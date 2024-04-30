@@ -1,0 +1,3 @@
+[run]
+omit = ahe-batch/ahe_batch/migrations/*, ahe_project/*, setup.py, manage.py 
+source = .

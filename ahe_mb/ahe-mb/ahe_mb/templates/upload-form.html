@@ -1,0 +1,36 @@
+<head>
+  <style>
+  table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  </style>
+</head>
+{% load crispy_forms_tags %}
+<form method="POST" enctype="multipart/form-data" ,class="uniForm">
+
+  {% csrf_token %}
+  <center>
+    <h1>Upload {{ name }} </h1>
+    <table border="1">
+      <tr>
+        <td>{{ form | crispy }}</td>
+      </tr>
+      <tr>
+        <td><input type="submit" value="Submit"></td>
+      </tr>
+    </table>
+    <br />
+    {% if success %}
+      <h3> File Uploaded Successfully</h3>
+    {% endif %}
+    {% if response %}
+    <table border="1">
+      {% for r in response %}
+        <tr>
+          <td>{{ r }}</td>
+        </tr>
+        {% endfor %}
+    {% endif %}
+  </center>
+</form>

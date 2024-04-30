@@ -1,0 +1,3 @@
+[run]
+omit = ahe-sys/ahe_sys/migrations/*, ahe_project/*, ahe-sys/pytest/*, setup.py, manage.py 
+source = .

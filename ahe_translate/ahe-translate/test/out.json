@@ -1,0 +1,161 @@
+{
+    "main": {
+        "epoch": 1650972540
+    },
+    "battery_1": {
+        "main": {
+            "battery_1_soc": 18.5,
+            "battery_1_power": 55151.734,
+            "battery_1_current": 69.83,
+            "battery_1_voltage": 789.8000000000001,
+            "battery_1_humidity": 7.0,
+            "battery_1_modbus_failed": false,
+            "battery_1_pcb_temperature": 48.0,
+            "battery_1_battery_heartbit": 2577400.0,
+            "battery_1_max_charge_power": 108.0,
+            "battery_1_max_module_voltage": 66.15,
+            "battery_1_min_module_voltage": 65.49,
+            "battery_1_max_discharge_power": 108.0,
+            "battery_1_max_string_temperature": 46.6,
+            "battery_1_nameplate_charge_capacity": 708.0,
+            "battery_1_nameplate_energy_capacity": 324000.0,
+            "battery_1_max_module_voltage_location": 506.0,
+            "battery_1_min_module_voltage_location": 1002.0,
+            "battery_1_max_string_temperature_location": 604.0
+        },
+        "battery_1_s_1": {
+            "main": {
+                "battery_1_s_1_soc": 19.0,
+                "battery_1_s_1_current": 5.679,
+                "battery_1_s_1_voltage": 789.8000000000001,
+                "battery_1_s_1_status_1": 7.0,
+                "battery_1_s_1_status_2": 0.0,
+                "battery_1_s_1_max_module_soc": 19.1,
+                "battery_1_s_1_min_module_soc": 18.9,
+                "battery_1_s_1_status_latch_1": 136.0,
+                "battery_1_s_1_status_latch_2": 192.0,
+                "battery_1_s_1_available_energy": 32.768,
+                "battery_1_s_1_max_module_voltage": 66.06,
+                "battery_1_s_1_min_module_voltage": 65.65,
+                "battery_1_s_1_average_module_voltage": 65.84,
+                "battery_1_s_1_max_module_temperature": 45.0,
+                "battery_1_s_1_min_module_temperature": 43.7,
+                "battery_1_s_1_average_module_temperature": 44.400000000000006
+            },
+            "battery_1_s_1_m_1": {
+                "battery_1_s_1_m_1_voltage": 66.06,
+                "battery_1_s_1_m_1_temperature": 44.400000000000006
+            },
+            "battery_1_s_1_m_2": {
+                "battery_1_s_1_m_2_voltage": 65.91,
+                "battery_1_s_1_m_2_temperature": 43.7
+            }
+        },
+        "battery_1_s_2": {
+            "main": {
+                "battery_1_s_2_soc": 18.1,
+                "battery_1_s_2_current": 5.703,
+                "battery_1_s_2_voltage": 789.2,
+                "battery_1_s_2_status_1": 7.0,
+                "battery_1_s_2_status_2": 0.0,
+                "battery_1_s_2_max_module_soc": 18.1,
+                "battery_1_s_2_min_module_soc": 17.900000000000002,
+                "battery_1_s_2_status_latch_1": 136.0,
+                "battery_1_s_2_status_latch_2": 64.0,
+                "battery_1_s_2_available_energy": 32.768,
+                "battery_1_s_2_max_module_voltage": 66.04,
+                "battery_1_s_2_min_module_voltage": 65.7,
+                "battery_1_s_2_average_module_voltage": 65.87,
+                "battery_1_s_2_max_module_temperature": 45.2,
+                "battery_1_s_2_min_module_temperature": 43.7,
+                "battery_1_s_2_average_module_temperature": 44.2
+            },
+            "battery_1_s_2_m_1": {
+                "battery_1_s_2_m_1_voltage": 66.04,
+                "battery_1_s_2_m_1_temperature": 44.2
+            },
+            "battery_1_s_2_m_2": {
+                "battery_1_s_2_m_2_voltage": 65.79,
+                "battery_1_s_2_m_2_temperature": 43.900000000000006
+            }
+        }
+    },
+    "battery_2": {
+        "main": {
+            "battery_2_soc": 15.5,
+            "battery_2_power": 53660.115000000005,
+            "battery_2_current": 67.95,
+            "battery_2_voltage": 789.7,
+            "battery_2_humidity": 6.0,
+            "battery_2_modbus_failed": false,
+            "battery_2_pcb_temperature": 48.0,
+            "battery_2_battery_heartbit": 2577800.0,
+            "battery_2_max_charge_power": 108.0,
+            "battery_2_max_module_voltage": 66.25,
+            "battery_2_min_module_voltage": 65.49,
+            "battery_2_max_discharge_power": 108.0,
+            "battery_2_max_string_temperature": 44.3,
+            "battery_2_nameplate_charge_capacity": 708.0,
+            "battery_2_nameplate_energy_capacity": 324000.0,
+            "battery_2_max_module_voltage_location": 309.0,
+            "battery_2_min_module_voltage_location": 908.0,
+            "battery_2_max_string_temperature_location": 1109.0
+        },
+        "battery_2_s_1": {
+            "main": {
+                "battery_2_s_1_soc": 15.4,
+                "battery_2_s_1_current": 5.601,
+                "battery_2_s_1_voltage": 790.0,
+                "battery_2_s_1_status_1": 7.0,
+                "battery_2_s_1_status_2": 0.0,
+                "battery_2_s_1_max_module_soc": 15.5,
+                "battery_2_s_1_min_module_soc": 15.3,
+                "battery_2_s_1_status_latch_1": 136.0,
+                "battery_2_s_1_status_latch_2": 0.0,
+                "battery_2_s_1_available_energy": 32.768,
+                "battery_2_s_1_max_module_voltage": 66.21000000000001,
+                "battery_2_s_1_min_module_voltage": 65.67,
+                "battery_2_s_1_average_module_voltage": 65.85,
+                "battery_2_s_1_max_module_temperature": 43.7,
+                "battery_2_s_1_min_module_temperature": 42.3,
+                "battery_2_s_1_average_module_temperature": 43.1
+            },
+            "battery_2_s_1_m_1": {
+                "battery_2_s_1_m_1_voltage": 66.21000000000001,
+                "battery_2_s_1_m_1_temperature": 42.8
+            },
+            "battery_2_s_1_m_2": {
+                "battery_2_s_1_m_2_voltage": 65.84,
+                "battery_2_s_1_m_2_temperature": 43.2
+            }
+        },
+        "battery_2_s_2": {
+            "main": {
+                "battery_2_s_2_soc": 15.3,
+                "battery_2_s_2_current": 5.569,
+                "battery_2_s_2_voltage": 789.4000000000001,
+                "battery_2_s_2_status_1": 7.0,
+                "battery_2_s_2_status_2": 0.0,
+                "battery_2_s_2_max_module_soc": 15.4,
+                "battery_2_s_2_min_module_soc": 15.1,
+                "battery_2_s_2_status_latch_1": 8.0,
+                "battery_2_s_2_status_latch_2": 0.0,
+                "battery_2_s_2_available_energy": 32.768,
+                "battery_2_s_2_max_module_voltage": 66.04,
+                "battery_2_s_2_min_module_voltage": 65.66,
+                "battery_2_s_2_average_module_voltage": 65.83,
+                "battery_2_s_2_max_module_temperature": 43.3,
+                "battery_2_s_2_min_module_temperature": 42.1,
+                "battery_2_s_2_average_module_temperature": 42.6
+            },
+            "battery_2_s_2_m_1": {
+                "battery_2_s_2_m_1_voltage": 65.87,
+                "battery_2_s_2_m_1_temperature": 42.1
+            },
+            "battery_2_s_2_m_2": {
+                "battery_2_s_2_m_2_voltage": 66.04,
+                "battery_2_s_2_m_2_temperature": 42.6
+            }
+        }
+    }
+}

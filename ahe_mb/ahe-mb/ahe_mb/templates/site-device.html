@@ -1,0 +1,41 @@
+<head>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ master.site }} - {{ master.version }}</h1>
+<p>
+    <a href="../csv/">Download CSV</a>
+</p>
+<table>
+    <tr>
+        <td>Device Type</td>
+        <td>Map</td>
+        <td>IP Address</td>
+        <td>Port</td>
+        <td>Unit</td>
+        <td>Data Hold Period</td>
+    </tr>
+    <tbody>
+        {% for detail in details %}
+        <tr>
+            <td>{{ detail.device_type }}</td>
+            <td>{{ detail.device_type }}</td>
+            <td>{{ detail.ip_address }}</td>
+            <td>{{ detail.port }}</td>
+            <td>{{ detail.unit }}</td>
+            <td>{{ detail.data_hold_period }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
