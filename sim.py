@@ -1,39 +1,21 @@
 import cmd
-import subprocess
+import csv
 import threading
 import time
-
+import os
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
-from pymodbus.device import ModbusDeviceIdentification
-from pymodbus.server.async_io import StartTcpServer
-
 from ahe_mb.models import Map, Field
 from ahe_mb.variable import ModbusVar
 from ahe_translate import Translate
 from ahe_translate.models import Config
-from config import parse_config_file
+from slave import run_slave
 
-def is_server_running(port):
-    cmd = f"netstat -tln | grep {ip}:{port}"
-    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return result.returncode == 0
 
 config = Config.objects.get(id=1)
 
 buffer_check_interval = 1
 ip = '0.0.0.0'
-def run_slave(server_context, port, name):
-    identity = ModbusDeviceIdentification()
-    if is_server_running(port):
-        print(f"Server for map {name} is already running @ {ip}:{port}")
-        return
-    try:
-        print(f"Starting server for map {name} @ {ip}:{port}")
-        StartTcpServer(context=server_context, identity=identity, address=(ip, port))
-    except Exception as e:
-        print(f"Failed to start server for map {name}: {e}")
-    else:
-        print(f"Started server for map {name} @ {ip}:{port}")
+
 
 class ModbusSlaveCmd(cmd.Cmd):
     intro = 'Simulator Setup\n'
@@ -52,37 +34,45 @@ class ModbusSlaveCmd(cmd.Cmd):
         self.buffer = list()
         self.maps = {}
         self.start_buffer_check_timer()
-        self.i = 0
+        self.i = 1
+        self.check_config()
 
-    def set_initial_values(self, map_obj, server_identity):
+    def check_config(self):
+        files = os.listdir("config/")
+        csv_files = [file.split(".csv")[0] for file in files if file.endswith('.csv')]
+        print(csv_files)
+        for i in csv_files:
+            if i not in self.map_names and i != "config":
+                print(f"map for file {i} does not exist")
+
+    def set_context(self, server_identity, data_block_size):
+        data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
+        store = ModbusSlaveContext(hr=data_block)
+        self.server_context[server_identity] = ModbusServerContext(slaves=store, single=True)
+        self.slaves[server_identity] = store
+
+    def set_all_initial_values_to_0(self, map_obj, server_identity):
         map_name = map_obj.name
         self.data[server_identity] = dict()
         field_addresses = self.field_dict[server_identity].keys()
-        field_names = self.field_dict[server_identity].values()
-        print(field_addresses)
-        print(field_names)
         for i in field_addresses:
             self.slaves[server_identity].setValues(3, i, [0])
         for address, name in self.field_dict[server_identity].items():
             self.data[server_identity][f"{map_name}_{name}"] = self.slaves[server_identity].getValues(3, address, count=1)[0]
-        print(self.data)
         return self.data
 
-    def set_initial_config(self):
-        config_data = parse_config_file()
-        print("config data", config_data)
-        for map_name, device_value in config_data.items():
-            relevant_slaves = [identity for identity in self.slaves.keys() if map_name in identity]
-            print("relevant slaves:", relevant_slaves)
-            for identity in relevant_slaves:
-                for variable, value in device_value.items():
-                    self.set_value_to_address(identity, variable, float(value))
+    def set_initial_config(self, map_name,server_identity ):
+        csv_file_path = f"config/{map_name}.csv"
+        if os.path.isfile(csv_file_path):
+            with open(csv_file_path, "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    self.set_value_to_address(server_identity, row['variable'], float(row['value']))
+        else:
+            print(f"initial config file for {map_name} not present")
 
     def set_value_to_address(self, server_identity, ahe_name, value):
-        print(ahe_name, server_identity, self.maps)
         map_name = self.maps[server_identity]
-        print(map_name)
-        print(self.get_field_dict[server_identity])
         field = self.get_field_dict[server_identity][ahe_name]
         register_address = field.field_address
         modbus_var = ModbusVar(field)
@@ -101,7 +91,6 @@ class ModbusSlaveCmd(cmd.Cmd):
             ahe_name = key.split(f"{self.maps[server_identity]}_")[-1]
             self.set_value_to_address(server_identity, ahe_name, value)
 
-
     def do_set(self, arg):
         delay = None
         args = arg.split()
@@ -117,7 +106,6 @@ class ModbusSlaveCmd(cmd.Cmd):
         except ValueError:
             print("Invalid argument(s).")
             return
-
         if server_identity not in self.slaves:
             print(f"Map {server_identity}  server not started")
             return
@@ -163,53 +151,56 @@ class ModbusSlaveCmd(cmd.Cmd):
             if map_obj:
                 field_names = [f.ahe_name for f in Field.objects.filter(map=map_obj)]
                 completions.extend(filter(lambda x: x.startswith(text), field_names))
-
         return completions
-
-    def set_context(self, server_identity, data_block_size):
-        data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
-        store = ModbusSlaveContext(hr=data_block)
-        self.server_context[server_identity] = ModbusServerContext(slaves=store, single=True)
-        self.slaves[server_identity] = store
-
 
     def do_start(self, arg):
         print("Starting Simulation Setup ....")
-        num_slaves_str = input("Enter the number of Modbus slave servers to start: ")
+        csv_file_path = "config/config.csv"
         try:
-            num_slaves = int(num_slaves_str)
-        except ValueError:
-            print("Invalid input. Please enter a valid integer.")
-            return
-        for i in range(num_slaves):
-            map_name = input(f"Enter the map for {i + 1} device: ")
-            if map_name not in self.map_names:
-                print(f"{map_name} is not a valid map name.")
-                continue
-            port_str = input(f"Enter the port number for {map_name}: ")
-            try:
-                port = int(port_str)
-            except ValueError:
-                print("Invalid input. Please enter a valid integer for the port number.")
-                continue
-            server_identity = f"{map_name}_{self.i}"
-            self.device[server_identity] = port
-            map_obj = Map.objects.filter(name=map_name).first()
-            if map_obj:
-                fields = Field.objects.filter(map=map_obj)
-                self.field_dict[server_identity] = {f.field_address: f.ahe_name for f in fields}
-                self.get_field_dict[server_identity] = {f.ahe_name : f for f in fields}
-                data_block_size = max(self.field_dict[server_identity].keys())+1
-                self.set_context(server_identity, data_block_size)
-                self.set_initial_values(map_obj, server_identity)
-                self.maps[server_identity] = map_name
-                self.set_initial_config()
-                thread = threading.Thread(target=run_slave, args=(self.server_context[server_identity], port, map_name,))
-                thread.start()
-                print(f"Modbus slave servers started successfully for {map_name}.")
-            else:
-                print(f"Error: Map {map_name} not found in the database.")
-            self.i += 1
+            with open(csv_file_path, "r") as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    map_name = row.get("map_name")
+                    port_str = row.get("port")
+                    if map_name not in self.map_names:
+                        print(f"{map_name} is not a valid map name.")
+                        continue
+                    try:
+                        port = int(port_str)
+                    except ValueError:
+                        print(f"Invalid port number {port}. Please enter a valid integer >1000 for the port number.")
+                        continue
+                    server_identity = f"{map_name}_{self.i}"
+                    self.device[server_identity] = port
+                    map_obj = Map.objects.filter(name=map_name).first()
+                    if map_obj:
+                        fields = Field.objects.filter(map=map_obj)
+                        self.field_dict[server_identity] = {f.field_address: f.ahe_name for f in fields}
+                        self.get_field_dict[server_identity] = {f.ahe_name: f for f in fields}
+                        data_block_size = max(self.field_dict[server_identity].keys()) + 1
+                        self.set_context(server_identity, data_block_size)
+                        self.set_all_initial_values_to_0(map_obj, server_identity)
+                        self.maps[server_identity] = map_name
+                        self.set_initial_config(map_name, server_identity)
+                        thread = threading.Thread(target=run_slave,
+                                                  args=(self.server_context[server_identity], port, map_name,))
+                        thread.start()
+                    else:
+                        print(f"Error: Map {map_name} not found in the database.")
+                    self.i += 1
+        except FileNotFoundError:
+            print("Config file not found.")
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")
+
+    def do_data(self,arg):
+        if len(arg) == 0:
+            print(self.data)
+        else:
+            print(self.data[arg])
+
+    def do_map(self,_):
+        print(self.map_names)
 
 if __name__ == "__main__":
     modbus_cmd = ModbusSlaveCmd()

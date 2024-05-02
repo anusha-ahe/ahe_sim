@@ -29,8 +29,8 @@ WORKDIR /opt/ems/ahe_translate/ahe-translate
 ENV PYTHONPATH /opt/ems/ahe_translate
 RUN pip install -e .
 
-COPY config.ini /opt/ems/config.ini
-COPY config.py /opt/ems/config.py
+COPY config/ /opt/ems/config/
+COPY slave.py /opt/ems/slave.py
 COPY sim.py /opt/ems/sim.py
 
 COPY ahe_project /opt/ems/ahe_project

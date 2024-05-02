@@ -2,3 +2,6 @@ map_name,port
 trumpf_ac_3025_hr,5000
 trumpf_ac_3025_hr,5001
 coslight_bms,5002
+trumpf_ac_3025_ir,5003
+bmser_1p238s_battery,5004
+kore_bms,5005
