@@ -40,7 +40,6 @@ class ModbusSlaveCmd(cmd.Cmd):
     def check_config(self):
         files = os.listdir("config/")
         csv_files = [file.split(".csv")[0] for file in files if file.endswith('.csv')]
-        print(csv_files)
         for i in csv_files:
             if i not in self.map_names and i != "config":
                 print(f"map for file {i} does not exist")
@@ -118,6 +117,7 @@ class ModbusSlaveCmd(cmd.Cmd):
         else:
             print(f"Value setting for {server_identity} at {ahe_name}  with {value} in {delay} seconds")
             self.buffer.append({server_identity: {ahe_name: value, "epoch": time.time() + delay}})
+
 
     def start_buffer_check_timer(self):
         self.buffer_check_timer = threading.Timer(buffer_check_interval, self.check_buffer)

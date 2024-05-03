@@ -1,13 +1,10 @@
-FROM vpn.wg1.ahe:5000/ahe-python:3.10.8-bullseye.27
+FROM python:latest
 
 ENV DJANGO_SETTINGS_MODULE=ahe_project.settings
 
-RUN pip uninstall pymodbus -y
+RUN pip install django django_restframework django_redis mergedeep
 
-RUN pip install pymodbus
-
-
-RUN pip show pymodbus
+RUN pip install pymodbus requests
 
 COPY ahe_log /opt/ems/ahe_log
 WORKDIR /opt/ems/ahe_log/ahe-log
