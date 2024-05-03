@@ -10,7 +10,6 @@ from ahe_translate import Translate
 from ahe_translate.models import Config
 from slave import run_slave
 
-
 config = Config.objects.get(id=1)
 
 buffer_check_interval = 1
@@ -36,6 +35,7 @@ class ModbusSlaveCmd(cmd.Cmd):
         self.start_buffer_check_timer()
         self.i = 1
         self.check_config()
+        self.threads = []
 
     def check_config(self):
         files = os.listdir("config/")
@@ -57,10 +57,11 @@ class ModbusSlaveCmd(cmd.Cmd):
         for i in field_addresses:
             self.slaves[server_identity].setValues(3, i, [0])
         for address, name in self.field_dict[server_identity].items():
-            self.data[server_identity][f"{map_name}_{name}"] = self.slaves[server_identity].getValues(3, address, count=1)[0]
+            self.data[server_identity][f"{map_name}_{name}"] = \
+            self.slaves[server_identity].getValues(3, address, count=1)[0]
         return self.data
 
-    def set_initial_config(self, map_name,server_identity ):
+    def set_initial_config(self, map_name, server_identity):
         csv_file_path = f"config/{map_name}.csv"
         if os.path.isfile(csv_file_path):
             with open(csv_file_path, "r") as csvfile:
@@ -77,10 +78,11 @@ class ModbusSlaveCmd(cmd.Cmd):
         modbus_var = ModbusVar(field)
         modbus_var.set_value(value)
         self.slaves[server_identity].setValues(3, register_address, modbus_var.registers)
-        self.data[server_identity][f"{map_name}_{field.ahe_name}"] = self.slaves[server_identity].getValues(3, register_address, count=1)[0]
+        self.data[server_identity][f"{map_name}_{field.ahe_name}"] = \
+        self.slaves[server_identity].getValues(3, register_address, count=1)[0]
         print(f"Value set for {map_name} for {field.ahe_name} with {modbus_var.registers}")
 
-    def update_and_translate_values(self, server_identity, ahe_name,  value):
+    def update_and_translate_values(self, server_identity, ahe_name, value):
         self.set_value_to_address(server_identity, ahe_name, value)
         translate = Translate(config)
         translated_data = translate.write(self.data[server_identity])
@@ -117,6 +119,31 @@ class ModbusSlaveCmd(cmd.Cmd):
         else:
             print(f"Value setting for {server_identity} at {ahe_name}  with {value} in {delay} seconds")
             self.buffer.append({server_identity: {ahe_name: value, "epoch": time.time() + delay}})
+
+    def do_setr(self, arg):
+        args = arg.split()
+        if len(args) != 5:
+            print("Usage: set <map> <ahe_name> <[value_list]> <duration> <interval>")
+            return
+        try:
+            server_identity = args[0]
+            ahe_name = args[1]
+            value = list(args[2])
+            duration = int(args[3])
+            interval = int(args[4])
+            if server_identity not in self.slaves:
+                print(f"Map {server_identity}  server not started")
+                return
+            if ahe_name not in self.field_dict[server_identity].values():
+                print(f"Field {ahe_name} not present in map {server_identity}.")
+                return
+            self.update_and_translate_values(server_identity, ahe_name, value[0])
+            interval_list = list(range(0, duration + interval, interval))
+            for i in range(1, len(value)):
+                self.buffer.append({server_identity: {ahe_name: value[i], "epoch": time.time() + interval_list[i]}})
+        except ValueError:
+            print("Invalid argument(s).")
+            return
 
 
     def start_buffer_check_timer(self):
@@ -185,6 +212,7 @@ class ModbusSlaveCmd(cmd.Cmd):
                         thread = threading.Thread(target=run_slave,
                                                   args=(self.server_context[server_identity], port, map_name,))
                         thread.start()
+                        self.threads.append(thread)
                     else:
                         print(f"Error: Map {map_name} not found in the database.")
                     self.i += 1
@@ -193,24 +221,20 @@ class ModbusSlaveCmd(cmd.Cmd):
         except Exception as e:
             print(f"Error reading CSV file: {e}")
 
-    def do_stop(self, arg):
-        print("Stopping all servers ...")
-        for server_identity, thread in self.server_context.items():
-            thread.stop()
-        print("Servers stopped.")
 
     def do_exit(self, _):
         print("Exiting code ...")
         return True
 
-    def do_data(self,arg):
+    def do_data(self, arg):
         if len(arg) == 0:
             print(self.data)
         else:
             print(self.data[arg])
 
-    def do_map(self,_):
+    def do_map(self, _):
         print(self.map_names)
+
 
 if __name__ == "__main__":
     modbus_cmd = ModbusSlaveCmd()
