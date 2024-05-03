@@ -193,6 +193,16 @@ class ModbusSlaveCmd(cmd.Cmd):
         except Exception as e:
             print(f"Error reading CSV file: {e}")
 
+    def do_stop(self, arg):
+        print("Stopping all servers ...")
+        for server_identity, thread in self.server_context.items():
+            thread.stop()
+        print("Servers stopped.")
+
+    def do_exit(self, _):
+        print("Exiting code ...")
+        return True
+
     def do_data(self,arg):
         if len(arg) == 0:
             print(self.data)
