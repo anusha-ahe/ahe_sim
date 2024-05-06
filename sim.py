@@ -130,7 +130,7 @@ class ModbusSlaveCmd(cmd.Cmd):
             ahe_name = args[1]
             value = eval(args[2])
             duration = int(args[3])
-            interval = args[4]
+            interval = args[4] if len(args) == 5 else None
             if interval is None:
                 interval_size = len(value)
                 interval_list = [interval_size * i for i in range(duration)]
