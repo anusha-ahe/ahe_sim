@@ -152,7 +152,17 @@ class ModbusSlaveCmd(cmd.Cmd):
             return
 
     def complete_setr(self, text, line, begidx, endidx):
-        self.complete_set(text, line, begidx, endidx)
+        arg = line.split()
+        completions = []
+        if len(arg) == 2:
+            completions.extend(filter(lambda x: x.startswith(text), list(self.maps.keys())))
+        if len(arg) == 3:
+            map_name = arg[1]
+            map_obj = Map.objects.filter(name=self.maps[map_name]).first()
+            if map_obj:
+                field_names = [f.ahe_name for f in Field.objects.filter(map=map_obj)]
+                completions.extend(filter(lambda x: x.startswith(text), field_names))
+        return completions
 
     def start_buffer_check_timer(self):
         self.buffer_check_timer = threading.Timer(buffer_check_interval, self.check_buffer)
