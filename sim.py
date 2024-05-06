@@ -151,6 +151,9 @@ class ModbusSlaveCmd(cmd.Cmd):
             print("Invalid argument(s).")
             return
 
+    def complete_setr(self, text, line, begidx, endidx):
+        self.complete_set(text, line, begidx, endidx)
+
     def start_buffer_check_timer(self):
         self.buffer_check_timer = threading.Timer(buffer_check_interval, self.check_buffer)
         self.buffer_check_timer.start()
