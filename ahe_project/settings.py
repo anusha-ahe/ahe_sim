@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'ahe_sys.apps.AheSysConfig',
     'ahe_translate',
-    'ahe_mb']
+    'ahe_mb',
+    'ahe_sim']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

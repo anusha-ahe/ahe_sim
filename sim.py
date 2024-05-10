@@ -259,3 +259,4 @@ class ModbusSlaveCmd(cmd.Cmd):
 if __name__ == "__main__":
     modbus_cmd = ModbusSlaveCmd()
     modbus_cmd.cmdloop()
+
