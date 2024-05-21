@@ -74,7 +74,9 @@ class SimTest(TestCase):
         mock_run_slave.return_value = None
         self.simulation.start_server()
         client = ModbusTcpClient('0.0.0.0', 5000)
-        client.connect()
+        connection = client.connect()
+        assert connection, "Client failed to connect to the server"
+        client.close()
 
 
 

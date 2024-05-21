@@ -62,13 +62,6 @@ class Simulation:
 
     def update_and_translate_values(self, server_identity, ahe_name, value):
         self.set_value_to_address(server_identity, ahe_name, value)
-        translate = Translate(config)
-        translated_data = translate.write(self.data[server_identity])
-        difference = {k: translated_data.get(k) for k in self.data[server_identity] if
-                      translated_data.get(k) != self.data[server_identity][k]}
-        for key, value in difference.items():
-            ahe_name = key.split(f"{self.maps[server_identity]}_")[-1]
-            self.set_value_to_address(server_identity, ahe_name, value)
 
 
     def pop_buffer_item(self, server_identity_key, item):
