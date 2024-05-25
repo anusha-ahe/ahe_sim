@@ -4,10 +4,9 @@ from ahe_mb.variable import ModbusVar
 from slave import run_slave
 from ahe_sim.models import SimulatorConfig
 import threading
-from ahe_translate.models import Config
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 
-config = Config.objects.get(id=1)
+
 
 
 class Simulation:

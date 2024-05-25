@@ -24,21 +24,24 @@ class SimulatorConfig(models.Model):
 
 
 class TestScenario(models.Model):
-    name = models.CharField(max_length=255, primary_key=True)
+    name = models.CharField(max_length=255)
+    timeout = models.FloatField(default=10)
+    enable = models.BooleanField(default=True)
 
 
-class ScenarioInput(models.Model):
-    test_scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE)
+class Input(models.Model):
+    test_scenario = models.ForeignKey(TestScenario,related_name='inputs', on_delete=models.CASCADE)
     variable = models.ForeignKey(Field, on_delete=models.CASCADE)
-    value = models.FloatField()
+    value = models.FloatField(default=0)
     initial_value = models.FloatField(default=0)
 
-class ScenarioOutput(models.Model):
-    test_scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE)
+class Output(models.Model):
+    test_scenario = models.ForeignKey(TestScenario, related_name='outputs', on_delete=models.CASCADE)
     variable = models.ForeignKey(Field, on_delete=models.CASCADE)
-    value = models.FloatField()
-    initial_value = models.FloatField(default=0)
+    value = models.FloatField(default=0)
     function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default='equal_to')
+    initial_value = models.FloatField(default=0)
+    initial_function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default='equal_to')
 
 class TestExecutionLog(models.Model):
     test_scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE)
