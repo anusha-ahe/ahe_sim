@@ -320,7 +320,7 @@ class FileLoader:
 
     def _save_maps(self):
         for map_id in self.maps:
-            print("Save map", map_id, self.maps[map_id], self.maps[map_id][0].data)
+            print("Save devices", map_id, self.maps[map_id], self.maps[map_id][0].data)
             map_name = "_".join(map_id)
             map_param = dict()
             map_param["name"] = map_name
