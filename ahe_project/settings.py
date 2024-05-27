@@ -36,6 +36,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'ahe_sys.apps.AheSysConfig',
+    'rest_framework',
+    'corsheaders',
+    'crispy_forms',
+    'crispy_bootstrap4',
     'ahe_translate',
     'ahe_mb',
     'ahe_sim']

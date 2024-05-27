@@ -2,8 +2,9 @@ from unittest import TestCase
 from unittest.mock import patch
 from pymodbus.client import ModbusTcpClient
 from ahe_sim.models import TestExecutionLog, Input, SimulatorConfig, TestScenario, Output
-from ahe_mb.models import Map, Field
+from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_sim.scenario import ScenarioUpdate
+from ahe_sys.models import AheClient, SiteDeviceList, Site, DeviceType
 
 TIMEOUT = 120
 
@@ -18,17 +19,25 @@ class SimTest(TestCase):
         TestScenario.objects.filter().delete()
         self.scenario_update  = ScenarioUpdate()
         self.map_obj = Map.objects.get_or_create(name='test')[0]
+        SiteDevice.objects.filter().delete()
+        self.device_type = DeviceType.objects.get_or_create(name='Test Inverter', device_category='inverter')[0]
+        self.device_map = DeviceMap.objects.get_or_create(device_type=self.device_type, map=self.map_obj)
+        self.client = AheClient.objects.get_or_create(name='test')[0]
+        self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
+        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
+        self.device = \
+        SiteDevice.objects.get_or_create(device_type=self.device_type, ip_address='0.0.0.0', port=5232, unit=1,name='test_1',
+                                         site_device_conf=self.site_device_conf)[0]
         self.field1 = Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field1', field_address=1, field_format='uint16')[0]
         self.field2 = Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field2', field_address=2, field_format='uint16', field_scale=0.1)[0]
         self.field3 = Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field3', field_address=3, field_format='uint16', field_scale=0.5)[0]
         self.field4 = \
         Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field4', field_address=4, field_format='uint16')[0]
-        SimulatorConfig.objects.get_or_create(map_name=self.map_obj, port=5000)
         self.test_scenario1 = TestScenario.objects.get_or_create(name='test_scenario1')[0]
-        Input.objects.get_or_create(variable=self.field1, test_scenario=self.test_scenario1, value=1, initial_value=1)
-        Input.objects.get_or_create(variable=self.field2, test_scenario=self.test_scenario1, value=2, initial_value=2)
-        Input.objects.get_or_create(variable=self.field3, test_scenario=self.test_scenario1, value=4, initial_value=3)
-        Output.objects.get_or_create(variable=self.field4, test_scenario=self.test_scenario1, value=10,function='equal_to',
+        Input.objects.get_or_create(variable=self.field1, device = self.device, test_scenario=self.test_scenario1, value=1, initial_value=1)
+        Input.objects.get_or_create(variable=self.field2, device = self.device,test_scenario=self.test_scenario1, value=2, initial_value=2)
+        Input.objects.get_or_create(variable=self.field3, device = self.device,test_scenario=self.test_scenario1, value=4, initial_value=3)
+        Output.objects.get_or_create(variable=self.field4,device = self.device, test_scenario=self.test_scenario1, value=10,function='equal_to',
                                             initial_value=5)
 
     @patch("ahe_sim.sim.run_slave")
@@ -55,10 +64,10 @@ class SimTest(TestCase):
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             data = simulation.data[server_identity]
-            assert data['test_test_field1'] == 1
-            assert data['test_test_field2'] == 20
-            assert data['test_test_field3'] == 6
-            assert data['test_test_field4'] == 5
+            assert data['test_field1'] == 1
+            assert data['test_field2'] == 20
+            assert data['test_field3'] == 6
+            assert data['test_field4'] == 5
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
 
     def test_update_initial_values_for_inputs_and_outputs_and_initial_update_failed_for_output(self):
@@ -73,9 +82,9 @@ class SimTest(TestCase):
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             data = simulation.data[server_identity]
-            assert data['test_test_field1'] == 1
-            assert data['test_test_field2'] == 20
-            assert data['test_test_field3'] == 6
+            assert data['test_field1'] == 1
+            assert data['test_field2'] == 20
+            assert data['test_field3'] == 6
         log = TestExecutionLog.objects.filter(test_scenario = self.test_scenario1)
         print(log)
         assert log[0].status == 'failure'
@@ -86,9 +95,9 @@ class SimTest(TestCase):
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             data = simulation.data[server_identity]
-            assert data['test_test_field1'] == 1
-            assert data['test_test_field2'] == 20
-            assert data['test_test_field3'] == 8
+            assert data['test_field1'] == 1
+            assert data['test_field2'] == 20
+            assert data['test_field3'] == 8
 
     def test_log_status(self):
         TestExecutionLog.objects.filter().delete()
@@ -100,9 +109,9 @@ class SimTest(TestCase):
             self.scenario_update.create_test_log_for_test_scenarios()
             self.scenario_update.update_values_for_inputs('initial')
             self.scenario_update.update_log_status_from_output('initial')
-            assert data['test_test_field1'] == 1
-            assert data['test_test_field2'] == 20
-            assert data['test_test_field3'] == 6
+            assert data['test_field1'] == 1
+            assert data['test_field2'] == 20
+            assert data['test_field3'] == 6
             simulation.set_value_to_address(server_identity, 'test_field4', 10)
             self.scenario_update.update_values_for_inputs()
             self.scenario_update.update_log_status_from_output()

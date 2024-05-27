@@ -1,3 +1,4 @@
+import ahe_mb.models
 from ahe_sim.models import TestExecutionLog, Input, Output, SimulatorConfig, TestScenario
 import time
 from ahe_mb.models import Field, Map
@@ -37,10 +38,11 @@ class ScenarioUpdate:
     def update_values_for_inputs(self, value_type=None):
         for log in TestExecutionLog.objects.filter(status='pending'):
             for inp in Input.objects.filter(test_scenario=log.test_scenario):
-                for identity in self.simulator.map[inp.variable.map.name]:
-                    value = inp.initial_value if value_type == 'initial' else inp.value
-                    print(value, "here2")
-                    self.simulator.update_and_translate_values(identity, inp.variable.ahe_name, value)
+                print("here12345", self.simulator.devices[inp.device.name])
+                print("here45", self.simulator.devices, self.simulator.data)
+                value = inp.initial_value if value_type == 'initial' else inp.value
+                print(value, "here2")
+                self.simulator.update_and_translate_values(inp.device.name, inp.variable.ahe_name, value)
 
     def compare_outputs(self, function, actual_output, expected_output):
         print(actual_output, function, expected_output)
@@ -63,17 +65,17 @@ class ScenarioUpdate:
             start_time = time.time()
             while time.time() - start_time <= log.test_scenario.timeout:
                 for out in Output.objects.filter(test_scenario=log.test_scenario):
-                    for identity in self.simulator.map[out.variable.map.name]:
-                        actual_output = self.simulator.get_values(identity, out.variable.map.name,
-                                                                  out.variable.ahe_name)
-                        cmp = self.compare_outputs(out.initial_function, actual_output, out.initial_value) \
-                            if value_type == 'initial' else self.compare_outputs(out.function, actual_output, out.value)
-                        if cmp and value_type != 'initial':
-                            log.status = 'success'
-                            log.save()
-                            break
-                        elif cmp and value_type == 'initial':
-                            break
+                    print("here123", self.simulator.devices[out.device.name])
+                    actual_output = self.simulator.get_values(out.device.name, out.variable.map.name,
+                                                              out.variable.ahe_name)
+                    cmp = self.compare_outputs(out.initial_function, actual_output, out.initial_value) \
+                        if value_type == 'initial' else self.compare_outputs(out.function, actual_output, out.value)
+                    if cmp and value_type != 'initial':
+                        log.status = 'success'
+                        log.save()
+                        break
+                    elif cmp and value_type == 'initial':
+                        break
                     else:
                         continue
                     break

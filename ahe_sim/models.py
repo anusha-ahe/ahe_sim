@@ -1,6 +1,6 @@
 from django.db import models
 
-from ahe_mb.models import Map, Field
+from ahe_mb.models import Map, Field, SiteDevice
 
 # Create your models here.
 
@@ -32,12 +32,14 @@ class TestScenario(models.Model):
 class Input(models.Model):
     test_scenario = models.ForeignKey(TestScenario,related_name='inputs', on_delete=models.CASCADE)
     variable = models.ForeignKey(Field, on_delete=models.CASCADE)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None)
     value = models.FloatField(default=0)
     initial_value = models.FloatField(default=0)
 
 class Output(models.Model):
     test_scenario = models.ForeignKey(TestScenario, related_name='outputs', on_delete=models.CASCADE)
     variable = models.ForeignKey(Field, on_delete=models.CASCADE)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None)
     value = models.FloatField(default=0)
     function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default='equal_to')
     initial_value = models.FloatField(default=0)
