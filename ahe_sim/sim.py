@@ -83,23 +83,23 @@ class Simulation:
                 for config_obj in config_objects:
                     device_name = config_obj.name
                     device_type = config_obj.device_type
-                    map_obj = DeviceMap.objects.filter(device_type=device_type)[0].map
-                    map_name = map_obj.name
-                    if map_name not in self.map_names:
-                        print(f"{map_name} is not a valid map name.")
-                        continue
-                    if device_name not in self.devices:
-                        self.devices[device_name] = list()
                     self.device[device_name] = port
-                    self.devices[device_name] = map_obj
-                    fields = Field.objects.filter(map=map_obj)
-                    if device_name not in self.field_dict:
-                        self.field_dict[device_name] = dict()
-                    if device_name not in self.get_field_dict:
-                        self.get_field_dict[device_name] = dict()
-                    for f in fields:
-                        self.field_dict[device_name][f.field_address] = f.ahe_name
-                        self.get_field_dict[device_name][f.ahe_name] = f
+                    for device_map in DeviceMap.objects.filter(device_type=device_type):
+                        map_name = device_map.map.name
+                        if map_name not in self.map_names:
+                            print(f"{map_name} is not a valid map name.")
+                            continue
+                        if device_name not in self.devices:
+                            self.devices[device_name] = list()
+                        if device_name not in self.field_dict:
+                            self.field_dict[device_name] = dict()
+                        if device_name not in self.get_field_dict:
+                            self.get_field_dict[device_name] = dict()
+                        self.devices[device_name].append(device_map.map)
+                        fields = Field.objects.filter(map=device_map.map)
+                        for f in fields:
+                            self.field_dict[device_name][f.field_address] = f.ahe_name
+                            self.get_field_dict[device_name][f.ahe_name] = f
             for device_name, port in self.device.items():
                 data_block_size = max(self.field_dict[device_name].keys()) + 1
                 self.set_context(device_name, data_block_size)
