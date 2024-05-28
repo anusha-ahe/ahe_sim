@@ -1,6 +1,9 @@
 import time
 from unittest import TestCase
 from unittest.mock import patch
+
+from pymodbus.exceptions import ModbusIOException
+
 from ahe_sim.models import SimulatorConfig
 from ahe_sim.sim import Simulation
 from pymodbus.datastore import ModbusServerContext
@@ -88,6 +91,41 @@ class SimTest(TestCase):
         print("connection", client.connected)
         assert connection, "Client failed to connect to the server"
         client.close()
+
+    def test_start_mul_ips_servers(self):
+        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
+                                                              self.field2.ahe_name: self.field2}}
+        self.simulation.devices = {"server_identity": self.map_obj.name}
+        self.simulation.start_server()
+        time.sleep(3)
+        client1 = ModbusTcpClient('192.168.1.21', 5021)
+        client2 = ModbusTcpClient('192.168.1.22', 5020)
+        connection1 = client1.connect()
+        connection2 = client2.connect()
+        print("Client 1 connected:", client1.connected)
+        print("Client 2 connected:", client2.connected)
+        assert connection1, "Client 1 failed to connect to the server"
+        assert connection2, "Client 2 failed to connect to the server"
+        client1.close()
+        client2.close()
+
+    @patch('pymodbus.client.ModbusTcpClient')
+    def test_communication_timeout(self, MockModbusTcpClient):
+        mock_client_instance = MockModbusTcpClient.return_value
+        mock_client_instance.read_holding_registers.side_effect = ModbusIOException("Read timeout")
+        self.simulation.set_context("server_identity", 10)
+        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
+                                                              self.field2.ahe_name: self.field2}}
+
+        self.simulation.set_all_initial_values_to_0("server_identity")
+        self.simulation.start_server()
+        try:
+            value = self.simulation.get_values("server_identity", 'test', 'test_field1')
+        except ModbusIOException as e:
+            self.assertEqual(str(e), "Read timeout")
+
 
 
 

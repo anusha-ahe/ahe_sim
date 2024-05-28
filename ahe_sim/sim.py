@@ -30,7 +30,8 @@ class Simulation:
         self.slaves[server_identity] = store
 
     def set_all_initial_values_to_0(self, server_identity):
-        self.data[server_identity] = dict()
+        if server_identity not in self.data:
+            self.data[server_identity] = dict()
         field_addresses = self.field_dict[server_identity].keys()
         for i in field_addresses:
             self.slaves[server_identity].setValues(3, i, [0])
@@ -80,12 +81,10 @@ class Simulation:
             print("devices by port", devices_by_port)
             for port, config_objects in devices_by_port.items():
                 for config_obj in config_objects:
+                    device_name = config_obj.name
                     device_type = config_obj.device_type
-                    print("device type", device_type, device_type.id)
                     map_obj = DeviceMap.objects.filter(device_type=device_type)[0].map
                     map_name = map_obj.name
-                    print("map", map_obj, map_name)
-                    device_name = config_obj.name
                     if map_name not in self.map_names:
                         print(f"{map_name} is not a valid map name.")
                         continue
@@ -94,19 +93,21 @@ class Simulation:
                     self.device[device_name] = port
                     self.devices[device_name] = map_obj
                     fields = Field.objects.filter(map=map_obj)
+                    if device_name not in self.field_dict:
+                        self.field_dict[device_name] = dict()
+                    if device_name not in self.get_field_dict:
+                        self.get_field_dict[device_name] = dict()
                     for f in fields:
-                        if device_name not in self.field_dict:
-                            self.field_dict[device_name] = dict()
-                        if device_name not in self.get_field_dict:
-                            self.get_field_dict[device_name] = dict()
                         self.field_dict[device_name][f.field_address] = f.ahe_name
                         self.get_field_dict[device_name][f.ahe_name] = f
+            for device_name, port in self.device.items():
                 data_block_size = max(self.field_dict[device_name].keys()) + 1
                 self.set_context(device_name, data_block_size)
                 self.set_all_initial_values_to_0(device_name)
                 thread = threading.Thread(target=run_slave,
                                   args=(self.server_context[device_name], port, device_name,))
                 thread.start()
+                print(f"server started for {device_name} {port}")
         except Exception as e:
             print(f"Error setting up simulation: {e}")
 

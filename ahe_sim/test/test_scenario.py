@@ -1,15 +1,10 @@
 from unittest import TestCase
 from unittest.mock import patch
-from pymodbus.client import ModbusTcpClient
-from ahe_sim.models import TestExecutionLog, Input, SimulatorConfig, TestScenario, Output
+from ahe_sim.models import TestExecutionLog, Input, TestScenario, Output
 from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_sim.scenario import ScenarioUpdate
 from ahe_sys.models import AheClient, SiteDeviceList, Site, DeviceType
 
-TIMEOUT = 120
-
-def scenario_update():
-    return ScenarioUpdate()
 
 class SimTest(TestCase):
     def setUp(self):
