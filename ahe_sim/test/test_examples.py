@@ -35,6 +35,7 @@ class SimTest(TestCase):
         self.field2 = Field.objects.get(map=self.map_obj2, ahe_name='p_setpoint_w')
         self.field3 = Field.objects.get(map=self.map_obj3, ahe_name='number_of_connected_sub_slaves')
         Input.objects.get_or_create(variable=self.field1, device=self.device1, test_scenario=self.test_scenario1,
+                                    function='equal_to',
                                     value=3.7, initial_value=3.4)
         Output.objects.get_or_create(variable=self.field2, device=self.device2, test_scenario=self.test_scenario1,
                                      value=0, function='equal_to',
@@ -42,24 +43,73 @@ class SimTest(TestCase):
         Output.objects.get_or_create(variable=self.field3, device=self.device2, test_scenario=self.test_scenario1,
                                      value=20, function='equal_to',
                                      initial_value=10)
+        self.test_scenario2 = TestScenario.objects.get_or_create(name='test to checkout communication error')[0]
+        Input.objects.get_or_create(device=self.device1, test_scenario=self.test_scenario2, function='communication_error',variable=self.field1)
+        Output.objects.get_or_create(variable=self.field2, device=self.device2, test_scenario=self.test_scenario2,
+                                     value=0, function='equal_to',
+                                     initial_value=1)
         self.scenario_update = ScenarioUpdate()
 
     def test_log_status_when_max_cell_voltage_greater_than_3(self):
         TestExecutionLog.objects.filter().delete()
         simulation = self.scenario_update.simulator
-        simulation.set_value_to_address('inverter_1', 'p_setpoint_w', 1000)
-        simulation.set_value_to_address('inverter_1', 'number_of_connected_sub_slaves', 10)
-        assert simulation.data['inverter_1']['p_setpoint_w'] == 1
-        self.scenario_update.get_available_test_scenarios_for_simulator()
         self.scenario_update.create_test_log_for_test_scenarios()
-        self.scenario_update.update_values_for_inputs('initial')
-        self.scenario_update.update_log_status_from_output('initial')
-        simulation.set_value_to_address('inverter_1', 'p_setpoint_w', 0)
-        simulation.set_value_to_address('inverter_1', 'number_of_connected_sub_slaves', 20)
+        self.scenario_update.start_servers()
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
+        simulation.set_value('inverter_1', 'p_setpoint_w', 1000)
+        simulation.set_value('inverter_1', 'number_of_connected_sub_slaves', 10)
+        assert simulation.data['inverter_1']['p_setpoint_w'] == 1
+
+        self.scenario_update.update_values_for_inputs(log, 'initial')
+        self.scenario_update.update_log_status_from_output(log, 'initial')
+        simulation.set_value('inverter_1', 'p_setpoint_w', 0)
+        simulation.set_value('inverter_1', 'number_of_connected_sub_slaves', 20)
         assert simulation.data['battery_1']['max_allowed_charge_voltage'] == 34
         assert simulation.data['inverter_1']['p_setpoint_w'] == 0
-        self.scenario_update.update_values_for_inputs()
-        self.scenario_update.update_log_status_from_output()
+        self.scenario_update.update_values_for_inputs(log)
+        self.scenario_update.update_log_status_from_output(log)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
+        assert log[0].status == 'success'
+
+    def test_log_status_when_communication_error(self):
+        TestExecutionLog.objects.filter().delete()
+        simulation = self.scenario_update.simulator
+        self.scenario_update.create_test_log_for_test_scenarios()
+        self.scenario_update.start_servers()
+        simulation.set_value('inverter_1', 'p_setpoint_w', 1000)
+        assert simulation.data['inverter_1']['p_setpoint_w'] == 1
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
+        self.scenario_update.update_values_for_inputs(log, 'initial')
+        self.scenario_update.update_log_status_from_output(log, 'initial')
+        print("here2", TestExecutionLog.objects.filter(test_scenario=self.test_scenario2).values())
+        simulation.set_value('inverter_1', 'p_setpoint_w', 0)
+        assert simulation.data['inverter_1']['p_setpoint_w'] == 0
+        time.sleep(2)
+        self.scenario_update.update_values_for_inputs(log)
+        self.scenario_update.update_log_status_from_output(log)
+        print(simulation.data)
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)
+        print(log.values())
+        assert log[0].status == 'success'
+
+
+    def test_all_examples(self):
+        TestExecutionLog.objects.filter().delete()
+        simulation = self.scenario_update.simulator
+        self.scenario_update.create_test_log_for_test_scenarios()
+        self.scenario_update.start_servers()
+        simulation.set_value('inverter_1', 'p_setpoint_w', 1000)
+        assert simulation.data['inverter_1']['p_setpoint_w'] == 1
+        for log in TestExecutionLog.objects.filter():
+            self.scenario_update.update_values_for_inputs(log, 'initial')
+            self.scenario_update.update_log_status_from_output(log,  'initial')
+            simulation.set_value('inverter_1', 'p_setpoint_w', 0)
+            assert simulation.data['inverter_1']['p_setpoint_w'] == 0
+            self.scenario_update.update_values_for_inputs(log)
+            self.scenario_update.update_log_status_from_output(log)
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)
+        assert log[0].status == 'success'
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
+        print(log.values())
         assert log[0].status == 'success'
 

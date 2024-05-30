@@ -27,19 +27,21 @@ class TestScenario(models.Model):
     name = models.CharField(max_length=255)
     timeout = models.FloatField(default=10)
     enable = models.BooleanField(default=True)
+    priority = models.IntegerField(default=1)
 
 
 class Input(models.Model):
     test_scenario = models.ForeignKey(TestScenario,related_name='inputs', on_delete=models.CASCADE)
-    variable = models.ForeignKey(Field, on_delete=models.CASCADE)
-    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None)
+    variable = models.ForeignKey(Field, on_delete=models.CASCADE,default=None,blank=True)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE,default=None,blank=True)
+    function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default=None)
     value = models.FloatField(default=0)
     initial_value = models.FloatField(default=0)
 
 class Output(models.Model):
     test_scenario = models.ForeignKey(TestScenario, related_name='outputs', on_delete=models.CASCADE)
-    variable = models.ForeignKey(Field, on_delete=models.CASCADE)
-    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None)
+    variable = models.ForeignKey(Field, on_delete=models.CASCADE,default=None,blank=True)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None,blank=True)
     value = models.FloatField(default=0)
     function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default='equal_to')
     initial_value = models.FloatField(default=0)

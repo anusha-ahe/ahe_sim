@@ -1,3 +1,4 @@
+import time
 from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_mb.variable import ModbusVar
 from slave import run_slave
@@ -5,25 +6,20 @@ import threading
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 
 
-
-
 class Simulation:
     def __init__(self):
         self.server_context = {}
         self.get_field_dict = {}
-        self.buffer_check_timer = None
         self.field_dict = {}
-        self.device = {}
         self.map_names = [m.name for m in Map.objects.filter()]
         self.slaves = {}
         self.data = {}
-        self.buffer = list()
         self.maps = {}
         self.i = 1
         self.threads = []
         self.devices = dict()
 
-    def set_context(self, server_identity, data_block_size):
+    def set_server_context(self, server_identity, data_block_size):
         data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
         store = ModbusSlaveContext(hr=data_block)
         self.server_context[server_identity] = ModbusServerContext(slaves=store, single=True)
@@ -40,13 +36,13 @@ class Simulation:
                 self.slaves[server_identity].getValues(3, address, count=1)[0]
         return self.data
 
-    def get_values(self,server_identity,map_name, name):
+    def get_values(self, server_identity, map_name, name):
         address = self.get_field_dict[server_identity][name]
-        value =self.slaves[server_identity].getValues(3, address.field_address, count=1)[0]
+        value = self.slaves[server_identity].getValues(3, address.field_address, count=1)[0]
         self.data[server_identity][f"{map_name}_{name}"] = value
         return value
 
-    def set_value_to_address(self, server_identity, ahe_name, value):
+    def set_value(self, server_identity, ahe_name, value):
         field = self.get_field_dict[server_identity][ahe_name]
         register_address = field.field_address
         modbus_var = ModbusVar(field)
@@ -57,19 +53,9 @@ class Simulation:
         print(f"Value set for {server_identity} for {field.ahe_name} with {modbus_var.registers}")
 
     def update_and_translate_values(self, server_identity, ahe_name, value):
-        self.set_value_to_address(server_identity, ahe_name, value)
+        self.set_value(server_identity, ahe_name, value)
 
-    def pop_buffer_item(self, server_identity_key, item):
-        ahe_name = list(item[server_identity_key].keys())[0]
-        value = item[server_identity_key][ahe_name]
-        self.update_and_translate_values(server_identity_key, ahe_name, value)
-        self.buffer.remove(item)
-        if server_identity_key in self.data:
-            map_name = self.devices[server_identity_key]
-            self.data[server_identity_key][f"{map_name}_{ahe_name}"] = value
-
-
-    def start_server(self):
+    def initialize_servers(self):
         try:
             config_objects = SiteDevice.objects.all()
             devices_by_port = {}
@@ -83,12 +69,7 @@ class Simulation:
                 for config_obj in config_objects:
                     device_name = config_obj.name
                     device_type = config_obj.device_type
-                    self.device[device_name] = port
                     for device_map in DeviceMap.objects.filter(device_type=device_type):
-                        map_name = device_map.map.name
-                        if map_name not in self.map_names:
-                            print(f"{map_name} is not a valid map name.")
-                            continue
                         if device_name not in self.devices:
                             self.devices[device_name] = list()
                         if device_name not in self.field_dict:
@@ -100,14 +81,19 @@ class Simulation:
                         for f in fields:
                             self.field_dict[device_name][f.field_address] = f.ahe_name
                             self.get_field_dict[device_name][f.ahe_name] = f
-            for device_name, port in self.device.items():
-                data_block_size = max(self.field_dict[device_name].keys()) + 1
-                self.set_context(device_name, data_block_size)
-                self.set_all_initial_values_to_0(device_name)
-                thread = threading.Thread(target=run_slave,
-                                  args=(self.server_context[device_name], port, device_name,))
-                thread.start()
-                print(f"server started for {device_name} {port}")
+                    self.threads.append((device_name, port))
         except Exception as e:
             print(f"Error setting up simulation: {e}")
 
+    def start_server(self, device_name, timeout=None):
+        for device, port in self.threads:
+            if device == device_name:
+                if timeout:
+                    time.sleep(timeout)
+                data_block_size = max(self.field_dict[device_name].keys()) + 1
+                self.set_server_context(device_name, data_block_size)
+                self.set_all_initial_values_to_0(device_name)
+                print(f"start server for {device_name} {port}")
+                thread = threading.Thread(target=run_slave,
+                                          args=(self.server_context[device_name], port, device_name))
+                thread.start()
