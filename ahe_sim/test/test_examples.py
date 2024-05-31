@@ -81,10 +81,9 @@ class SimTest(TestCase):
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
-        print("here2", TestExecutionLog.objects.filter(test_scenario=self.test_scenario2).values())
         simulation.set_value('inverter_1', 'p_setpoint_w', 0)
         assert simulation.data['inverter_1']['p_setpoint_w'] == 0
-        time.sleep(2)
+        time.sleep(1)
         self.scenario_update.update_values_for_inputs(log)
         self.scenario_update.update_log_status_from_output(log)
         print(simulation.data)

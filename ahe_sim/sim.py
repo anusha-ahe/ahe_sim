@@ -56,26 +56,22 @@ class Simulation:
         self.set_value(server_identity, ahe_name, value)
 
     def initialize_servers(self):
+        devices_by_port = {}
         try:
-            config_objects = SiteDevice.objects.all()
-            devices_by_port = {}
-            for config_obj in config_objects:
-                port = config_obj.port
+            device_objects = SiteDevice.objects.all()
+            for device_obj in device_objects:
+                port = device_obj.port
                 if port not in devices_by_port:
-                    devices_by_port[port] = []
-                devices_by_port[port].append(config_obj)
+                    devices_by_port[port] = list()
+                devices_by_port[port].append(device_obj)
             print("devices by port", devices_by_port)
-            for port, config_objects in devices_by_port.items():
-                for config_obj in config_objects:
-                    device_name = config_obj.name
-                    device_type = config_obj.device_type
-                    for device_map in DeviceMap.objects.filter(device_type=device_type):
-                        if device_name not in self.devices:
-                            self.devices[device_name] = list()
-                        if device_name not in self.field_dict:
-                            self.field_dict[device_name] = dict()
-                        if device_name not in self.get_field_dict:
-                            self.get_field_dict[device_name] = dict()
+            for port, device_objects in devices_by_port.items():
+                for device_obj in device_objects:
+                    device_name = device_obj.name
+                    for device_map in DeviceMap.objects.filter(device_type=device_obj.device_type):
+                        self.devices.setdefault(device_name, [])
+                        self.field_dict.setdefault(device_name, {})
+                        self.get_field_dict.setdefault(device_name, {})
                         self.devices[device_name].append(device_map.map)
                         fields = Field.objects.filter(map=device_map.map)
                         for f in fields:
