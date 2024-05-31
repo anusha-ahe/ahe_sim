@@ -1,6 +1,6 @@
 import time
 from unittest import TestCase
-from unittest.mock import patch
+from pymodbus.client import ModbusTcpClient
 from ahe_sim.models import TestExecutionLog, Input, TestScenario, Output
 from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_sim.scenario import ScenarioUpdate
@@ -49,6 +49,7 @@ class SimTest(TestCase):
                                      value=0, function='equal_to',
                                      initial_value=1)
         self.scenario_update = ScenarioUpdate()
+        self.scenario_update.stop_servers()
 
     def test_log_status_when_max_cell_voltage_greater_than_3(self):
         TestExecutionLog.objects.filter().delete()
@@ -70,6 +71,7 @@ class SimTest(TestCase):
         self.scenario_update.update_log_status_from_output(log)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
         assert log[0].status == 'success'
+        self.scenario_update.stop_servers()
 
     def test_log_status_when_communication_error(self):
         TestExecutionLog.objects.filter().delete()
@@ -90,10 +92,17 @@ class SimTest(TestCase):
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)
         print(log.values())
         assert log[0].status == 'success'
+        client = ModbusTcpClient('0.0.0.0', 5201)
+        connection = client.connect()
+        assert connection
+        client = ModbusTcpClient('0.0.0.0', 5200)
+        connection = client.connect()
+        assert not connection
+        self.scenario_update.stop_servers()
+
 
 
     def test_all_examples(self):
-        TestExecutionLog.objects.filter().delete()
         simulation = self.scenario_update.simulator
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
@@ -111,4 +120,5 @@ class SimTest(TestCase):
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
         print(log.values())
         assert log[0].status == 'success'
+        self.scenario_update.stop_servers()
 

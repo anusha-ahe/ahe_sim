@@ -21,7 +21,7 @@ class SimTest(TestCase):
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
         self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
         self.device = \
-        SiteDevice.objects.get_or_create(device_type=self.device_type, ip_address='0.0.0.0', port=5232, unit=1,name='test_1',
+        SiteDevice.objects.get_or_create(device_type=self.device_type, ip_address='0.0.0.0', port=5234, unit=1,name='test_1',
                                          site_device_conf=self.site_device_conf)[0]
         self.field1 = Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field1', field_address=1, field_format='uint16')[0]
         self.field2 = Field.objects.get_or_create(map=self.map_obj, ahe_name='test_field2', field_address=2, field_format='uint16', field_scale=0.1)[0]

@@ -2,6 +2,7 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
+import pytest
 from pymodbus.exceptions import ModbusIOException
 
 from ahe_sim.models import SimulatorConfig
@@ -11,6 +12,7 @@ from ahe_mb.models import Map, Field, DeviceMap, SiteDevice
 from pymodbus.client import ModbusTcpClient
 
 from ahe_sys.models import DeviceType, Site, AheClient, SiteDeviceList
+from slave import get_pids
 
 
 def simulation():
@@ -31,7 +33,7 @@ class SimTest(TestCase):
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
         self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
         self.device =  SiteDevice.objects.get_or_create(device_type=self.device_type,ip_address='0.0.0.0', port=5232,unit=1,
-                                                        site_device_conf= self.site_device_conf)[0]
+                                                        site_device_conf= self.site_device_conf,name='server_identity')[0]
 
     def test_set_server_context(self):
         self.simulation.set_server_context("server_identity", 10)
@@ -83,7 +85,8 @@ class SimTest(TestCase):
         self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2}}
-        self.simulation.devices = {"server_identity": self.map_obj.name}
+        self.simulation.devices = {"server_identity": [self.map_obj.name]}
+        self.simulation.initialize_servers()
         self.simulation.start_server("server_identity")
         time.sleep(2)
         client = ModbusTcpClient('0.0.0.0', 5232)
@@ -91,8 +94,14 @@ class SimTest(TestCase):
         print("connection", client.connected)
         assert connection, "Client failed to connect to the server"
         client.close()
+        self.simulation.stop_server('server_identity')
+        client = ModbusTcpClient('0.0.0.0', 5232)
+        connection = client.connect()
+        print("connection", connection)
+        assert not connection
+
     @patch('pymodbus.client.ModbusTcpClient')
-    def test_communication_timeout(self, MockModbusTcpClient):
+    def test_timeout_error_simulation_for_modbus(self, MockModbusTcpClient):
         mock_client_instance = MockModbusTcpClient.return_value
         mock_client_instance.read_holding_registers.side_effect = ModbusIOException("Read timeout")
         self.simulation.set_server_context("server_identity", 10)
@@ -106,6 +115,7 @@ class SimTest(TestCase):
             value = self.simulation.get_values("server_identity", 'test', 'test_field1')
         except ModbusIOException as e:
             self.assertEqual(str(e), "Read timeout")
+        self.simulation.stop_server('server_identity')
 
 
 

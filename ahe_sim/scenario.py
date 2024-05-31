@@ -13,6 +13,7 @@ class ScenarioUpdate:
         self.simulator.initialize_servers()
         self.input = dict()
         self.stop_device = list()
+        self.device_names = ahe_mb.models.SiteDevice.objects.values_list('name', flat=True).distinct()
 
     def get_available_test_scenarios_for_simulator(self):
         distinct_device_ids = ahe_mb.models.SiteDevice.objects.values_list('id', flat=True).distinct()
@@ -21,41 +22,27 @@ class ScenarioUpdate:
         combined_test_scenarios = TestScenario.objects.filter(combined_conditions).order_by('priority').distinct()
         return combined_test_scenarios
 
-    def sort_test_scenarios(self, test_scenarios):
-        error_scenarios = []
-        other_scenarios = []
-        for scenario in test_scenarios:
-            if Input.objects.filter(test_scenario=scenario, function='communication_error').exists():
-                error_scenarios.append(scenario)
-            else:
-                other_scenarios.append(scenario)
-        return error_scenarios + other_scenarios
-
     def start_servers(self):
-        distinct_device_names = ahe_mb.models.SiteDevice.objects.values_list('name', flat=True).distinct()
-        test_scenarios = self.get_available_test_scenarios_for_simulator()
-        error_inputs = Input.objects.filter(
-            test_scenario__in=test_scenarios,
-            function='communication_error')
-        stop_device_names = error_inputs.values_list('device__name', flat=True).distinct()
-        for device in distinct_device_names:
-            if device in stop_device_names:
-                self.stop_device.append(device)
-            else:
-                self.simulator.start_server(device)
-                print("started server for device", device)
-        print("not started servers ", self.stop_device)
+        for device in self.device_names:
+            self.simulator.start_server(device)
+            print("started server for device", device)
+
+    def stop_servers(self):
+        for device in self.device_names:
+            self.simulator.stop_server(device)
+            print("stopped server for device", device)
+
 
     def create_test_log_for_test_scenarios(self):
-        test_scenarios = self.sort_test_scenarios(self.get_available_test_scenarios_for_simulator())
+        test_scenarios = self.get_available_test_scenarios_for_simulator()
         for scenario in test_scenarios:
             TestExecutionLog.objects.get_or_create(test_scenario=scenario, epoch=time.time(), status='pending')
 
     def update_values_for_inputs(self, log, value_type=None):
         for inp in Input.objects.filter(test_scenario=log.test_scenario):
-            if inp.function != 'communication_error' and value_type == 'initial':
-                if inp.device.name in self.stop_device:
-                    self.simulator.start_server(inp.device.name)
+            if inp.function == 'communication_error' and value_type == 'initial':
+                self.simulator.stop_server(inp.device.name)
+                self.stop_device.append(inp.device.name)
             value = inp.initial_value if value_type == 'initial' else inp.value
             if value:
                 self.simulator.update_and_translate_values(inp.device.name, inp.variable.ahe_name, value)
@@ -107,6 +94,10 @@ class ScenarioUpdate:
             self.update_log_status_from_output(log, 'initial')
             self.update_values_for_inputs(log)
             self.update_log_status_from_output(log)
+            if self.stop_device:
+                for device in self.stop_device:
+                    self.simulator.start_server(device)
+
 
 
 if __name__ == '__main__':

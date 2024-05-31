@@ -1,13 +1,14 @@
 import time
 from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_mb.variable import ModbusVar
-from slave import run_slave
-import threading
+from slave import run_slave, kill_processes_by_pids, get_pids
+import multiprocessing
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 
 
 class Simulation:
     def __init__(self):
+        self.server_processes = {}
         self.server_context = {}
         self.get_field_dict = {}
         self.field_dict = {}
@@ -16,7 +17,7 @@ class Simulation:
         self.data = {}
         self.maps = {}
         self.i = 1
-        self.threads = []
+        self.processes = []
         self.devices = dict()
 
     def set_server_context(self, server_identity, data_block_size):
@@ -69,7 +70,9 @@ class Simulation:
                 for device_obj in device_objects:
                     device_name = device_obj.name
                     for device_map in DeviceMap.objects.filter(device_type=device_obj.device_type):
-                        self.devices.setdefault(device_name, [])
+                        if not device_name in self.devices:
+                            self.devices[device_name] = []
+                        print(self.devices, type(self.devices))
                         self.field_dict.setdefault(device_name, {})
                         self.get_field_dict.setdefault(device_name, {})
                         self.devices[device_name].append(device_map.map)
@@ -77,12 +80,14 @@ class Simulation:
                         for f in fields:
                             self.field_dict[device_name][f.field_address] = f.ahe_name
                             self.get_field_dict[device_name][f.ahe_name] = f
-                    self.threads.append((device_name, port))
+                    print(device_name, port, type(self.processes))
+                    self.processes.append((device_name, port))
         except Exception as e:
             print(f"Error setting up simulation: {e}")
 
     def start_server(self, device_name, timeout=None):
-        for device, port in self.threads:
+        print("processes", self.processes)
+        for device, port in self.processes:
             if device == device_name:
                 if timeout:
                     time.sleep(timeout)
@@ -90,6 +95,21 @@ class Simulation:
                 self.set_server_context(device_name, data_block_size)
                 self.set_all_initial_values_to_0(device_name)
                 print(f"start server for {device_name} {port}")
-                thread = threading.Thread(target=run_slave,
-                                          args=(self.server_context[device_name], port, device_name))
-                thread.start()
+                process = multiprocessing.Process(target=run_slave, args=(self.server_context[device_name], port, device_name))
+                process.start()
+                self.server_processes.setdefault(device_name, [])
+                self.server_processes[device_name].append(process)
+            print("server processes", self.server_processes)
+
+
+    def stop_server(self, device_name):
+        if device_name not in self.server_processes:
+            print(f"No server running for {device_name}.")
+            return
+        processes = self.server_processes[device_name]
+        for proc in processes:
+            print(f"process to stop {proc}")
+            proc.terminate()
+            proc.join()
+        del self.server_processes[device_name]
+        print(f"Server for {device_name} stopped.")
