@@ -12,7 +12,7 @@ from ahe_mb.models import Map, Field, DeviceMap, SiteDevice
 from pymodbus.client import ModbusTcpClient
 
 from ahe_sys.models import DeviceType, Site, AheClient, SiteDeviceList
-from slave import get_pids
+
 
 
 def simulation():

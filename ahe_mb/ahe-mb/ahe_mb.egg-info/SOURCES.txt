@@ -46,6 +46,7 @@ ahe_mb/migrations/0019_remove_device_mod_remove_mapmodifier_mod_and_more.py
 ahe_mb/migrations/0020_rename_device_sitedevice.py
 ahe_mb/migrations/0021_alter_bitvalue_bit_map_alter_devicemap_device_type_and_more.py
 ahe_mb/migrations/0022_alter_field_description.py
+ahe_mb/migrations/0023_alter_sitedevice_site_device_conf_and_more.py
 ahe_mb/migrations/__init__.py
 test/test_api.py
 test/test_bitmap_api.py

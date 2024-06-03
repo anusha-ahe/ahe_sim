@@ -1,18 +1,19 @@
 Metadata-Version: 2.1
-Name: ahe-sys
+Name: ahe-log
 Version: 0.1.1
-Summary: Base project to group diffrent setup
-Home-page: https://gitlab.com/amperehourenergy/ahe_sys.git
-Author: Rohit Gupta
-Author-email: rohit_gupta@amperehourenergy.com
+Summary: ahe_log used for logging the log in database
+Home-page: git@gitlab.com:amperehourenergy/ahe_log.git
+Author: Kanaiya Thakkar
+Author-email: kanaiya_thakkar@amperehourenergy.com
 License: UNKNOWN
 Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
 Classifier: Environment :: Web Environment
 Classifier: Intended Audience :: Developers
-Classifier: License :: OSI Approved :: AHE License
+Classifier: License :: OSI Approved :: BSD License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
+License-File: LICENSE
 
 UNKNOWN
 

@@ -2,9 +2,11 @@ FROM python:latest
 
 ENV DJANGO_SETTINGS_MODULE=ahe_project.settings
 
-RUN pip install django django_restframework django_redis mergedeep
+RUN pip install django djangorestframework django_redis mergedeep
 
-RUN pip install pymodbus requests
+RUN pip install pymodbus requests django-cors-headers 
+
+RUN pip install django-crispy-forms crispy-bootstrap4
 
 COPY ahe_log /opt/ems/ahe_log
 WORKDIR /opt/ems/ahe_log/ahe-log
@@ -28,7 +30,7 @@ RUN pip install -e .
 
 COPY config/ /opt/ems/config/
 COPY slave.py /opt/ems/slave.py
-COPY sim.py /opt/ems/sim.py
+COPY manage.py /opt/ems/manage.py
 
 COPY ahe_project /opt/ems/ahe_project
 WORKDIR /opt/ems/ahe_project/ahe-project
@@ -38,6 +40,6 @@ WORKDIR /opt/ems
 
 COPY db.sqlite3 /opt/ems/db.sqlite3
 
-CMD ["sleep", "infinity"]
+CMD ["python3", "manage.py","runserver","0.0.0.0:8100"]
 
 

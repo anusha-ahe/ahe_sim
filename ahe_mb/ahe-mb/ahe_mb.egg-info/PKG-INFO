@@ -5,6 +5,8 @@ Summary: read data from modbus
 Home-page: git@gitlab.com:amperehourenergy/ahe_mb.git
 Author: Rohit Gupta
 Author-email: rohitrgupta@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
 Classifier: Development Status :: 4 - Beta
 Classifier: Environment :: Web Environment
 Classifier: Intended Audience :: Developers
@@ -12,3 +14,6 @@ Classifier: License :: OSI Approved :: AHE License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
 License-File: LICENSE
+
+UNKNOWN
+
