@@ -42,7 +42,7 @@ class ModbusSlaveCmd(cmd.Cmd):
         csv_files = [file.split(".csv")[0] for file in files if file.endswith('.csv')]
         for i in csv_files:
             if i not in self.map_names and i != "config":
-                print(f"map for file {i} does not exist")
+                print(f"devices for file {i} does not exist")
 
     def set_context(self, server_identity, data_block_size):
         data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
@@ -96,7 +96,7 @@ class ModbusSlaveCmd(cmd.Cmd):
         delay = None
         args = arg.split()
         if len(args) != 3 and len(args) != 4:
-            print("Usage: set <map> <ahe_name> <value> or set <map> <ahe_name> <value> <delay>")
+            print("Usage: set <devices> <ahe_name> <value> or set <devices> <ahe_name> <value> <delay>")
             return
         try:
             server_identity = args[0]
@@ -111,7 +111,7 @@ class ModbusSlaveCmd(cmd.Cmd):
             print(f"Map {server_identity}  server not started")
             return
         if ahe_name not in self.field_dict[server_identity].values():
-            print(f"Field {ahe_name} not present in map {server_identity}.")
+            print(f"Field {ahe_name} not present in devices {server_identity}.")
             return
         if not delay:
             print(f"Value setting for {server_identity} at {ahe_name}")
@@ -123,7 +123,7 @@ class ModbusSlaveCmd(cmd.Cmd):
     def do_setr(self, arg):
         args = arg.split()
         if len(args) != 5 and len(args) != 4:
-            print("Usage: set <map> <ahe_name> <[value_list]> <duration> <interval>")
+            print("Usage: set <devices> <ahe_name> <[value_list]> <duration> <interval>")
             return
         try:
             server_identity = args[0]
@@ -141,7 +141,7 @@ class ModbusSlaveCmd(cmd.Cmd):
                 print(f"Map {server_identity}  server not started")
                 return
             if ahe_name not in self.field_dict[server_identity].values():
-                print(f"Field {ahe_name} not present in map {server_identity}.")
+                print(f"Field {ahe_name} not present in devices {server_identity}.")
                 return
             self.update_and_translate_values(server_identity, ahe_name, value[0])
 
@@ -208,7 +208,7 @@ class ModbusSlaveCmd(cmd.Cmd):
                     map_name = row.get("map_name")
                     port_str = row.get("port")
                     if map_name not in self.map_names:
-                        print(f"{map_name} is not a valid map name.")
+                        print(f"{map_name} is not a valid devices name.")
                         continue
                     try:
                         port = int(port_str)

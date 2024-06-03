@@ -1,0 +1,62 @@
+<head>
+    <style>
+        table,
+        th,
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ name }}</h1>
+<a href="../upload/">Upload new file</a>
+<p></p>
+<table>
+    <tr>
+        <th> {{ name }}</th>
+    </tr>
+    {% for map in maps %}
+    <tr>
+        <td>
+            <a href="../{{ map.pk }}/html/">{{ map.name }} V:{{ map.version }}</a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    {% for bit_map in bit_maps %}
+    <tr>
+        <td>
+            <a href="../{{ bit_map.pk }}/html/">{{ bit_map.name }} V:{{ bit_map.version }}</a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    {% for enum in enums %}
+    <tr>
+        <td>
+            <a href="../{{ enum.pk }}/html/">{{ enum.name }} V:{{ enum.version}} </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    {% for device in devices %}
+    <tr>
+        <td>
+            <a href="../{{ device.pk }}/html/">{{ device.name }} V:{{ device.version}} </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    {% for device in site_devices %}
+    <tr>
+        <td>
+            <a href="../{{ device.pk }}/html/">{{ device.site }} V:{{ device.version}} </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+{% endblock %}
