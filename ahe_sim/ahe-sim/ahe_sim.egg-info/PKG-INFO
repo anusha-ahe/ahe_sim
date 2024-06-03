@@ -1,0 +1,14 @@
+Metadata-Version: 2.1
+Name: ahe-sim
+Version: 0.1.1
+Summary: modbus simulator
+Home-page: git@github.com:amperehourenergy/ahe_sim.git
+Author: Anusha N
+Author-email: anusha.nss@gmail.com
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: AHE License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+License-File: LICENSE
