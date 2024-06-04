@@ -8,7 +8,7 @@ from ahe_mb.models import Map, Field
 from ahe_mb.variable import ModbusVar
 from ahe_translate import Translate
 from ahe_translate.models import Config
-from slave import run_slave
+from ahe_sim.slave import run_slave
 
 config = Config.objects.get(id=1)
 
@@ -38,7 +38,7 @@ class ModbusSlaveCmd(cmd.Cmd):
         self.threads = []
 
     def check_config(self):
-        files = os.listdir("config/")
+        files = os.listdir("../config/")
         csv_files = [file.split(".csv")[0] for file in files if file.endswith('.csv')]
         for i in csv_files:
             if i not in self.map_names and i != "config":
@@ -200,7 +200,7 @@ class ModbusSlaveCmd(cmd.Cmd):
 
     def do_start(self, arg):
         print("Starting Simulation Setup ....")
-        csv_file_path = "config/config.csv"
+        csv_file_path = "../config/config.csv"
         try:
             with open(csv_file_path, "r") as csvfile:
                 reader = csv.DictReader(csvfile)

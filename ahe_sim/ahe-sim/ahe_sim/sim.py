@@ -1,7 +1,7 @@
 import time
 from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_mb.variable import ModbusVar
-from slave import run_slave
+from ahe_sim.slave import run_slave
 import multiprocessing
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 

@@ -1,6 +1,4 @@
 import os
-from ahe_project.settings_base import *
-
 
 DATABASES = {
     'default': {
