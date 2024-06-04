@@ -30,6 +30,7 @@ RUN pip install -e .
 
 
 COPY ahe_sim /opt/ems/ahe_sim
+COPY ahe_project /opt/ems/ahe_sim/ahe_project
 WORKDIR /opt/ems/ahe_sim/ahe-sim
 ENV PYTHONPATH /opt/ems/ahe_sim
 RUN pip install -e .
