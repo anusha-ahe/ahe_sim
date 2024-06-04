@@ -28,18 +28,15 @@ WORKDIR /opt/ems/ahe_translate/ahe-translate
 ENV PYTHONPATH /opt/ems/ahe_translate
 RUN pip install -e .
 
+COPY ahe_sim /opt/ems/ahe_sim
+WORKDIR /opt/ems/ahe_sim/ahe-sim
+ENV PYTHONPATH /opt/ems/ahe_sim
+RUN pip install -e .
+
 COPY config/ /opt/ems/config/
-COPY ahe_sim/ahe-sim/ahe_sim/slave.py /opt/ems/slave.py
-COPY ahe_sim/manage.py /opt/ems/manage.py
 
-COPY ahe_sim/ahe_project /opt/ems/ahe_project
-WORKDIR /opt/ems/ahe_project/ahe-project
-ENV PYTHONPATH /opt/ems/ahe_project
+WORKDIR /opt/ems/ahe_sim
 
-WORKDIR /opt/ems
-
-COPY ahe_sim/db.sqlite3 /opt/ems/db.sqlite3
-
-CMD ["python3", "manage.py","runserver","0.0.0.0:8100"]
+CMD ["sleep", "infinity"]
 
 

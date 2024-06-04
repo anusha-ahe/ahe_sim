@@ -33,7 +33,7 @@ DEVICE_CATEGORY = [
 ]
 
 def is_valid_host_name(name):
-    allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
+    allowed = re.compile(r"(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
     match = allowed.match(name)
     return match
 

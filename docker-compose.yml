@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  sim:
+    build: .
+    container_name: sim
+    command: ["python3", "manage.py", "runserver", "0.0.0.0:8100"]
+    ports:
+      - "8100:8100"
+    environment:
+      - DJANGO_SETTINGS_MODULE=ahe_project.settings
