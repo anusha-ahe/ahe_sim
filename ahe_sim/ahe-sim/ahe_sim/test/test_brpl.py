@@ -103,13 +103,6 @@ class SimTest(TestCase):
                                      test_scenario=self.test_scenario3,
                                      value=0, function='equal_to',
                                      initial_value=15)
-        self.test_scenario4 = TestScenario.objects.get_or_create(name='turn off pcs1 when max_cell_voltage >= 3.6')[0]
-        Input.objects.get_or_create(device=self.battery_1, test_scenario=self.test_scenario3,
-                                    variable=self.max_cell_voltage, initial_value=3.6, value=3.8, function='equal_to')
-        Output.objects.get_or_create(variable=self.active_power, device=self.inverter_1,
-                                     test_scenario=self.test_scenario3,
-                                     value=0, function='equal_to',
-                                     initial_value=15)
         self.scenario_update = ScenarioUpdate()
 
 
