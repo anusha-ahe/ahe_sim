@@ -78,14 +78,13 @@ class ScenarioUpdate:
                 print("here", cmp, value_type,out.variable.ahe_name)
                 outputs.append(cmp)
                 print("all outputs",outputs)
-            if all(outputs):
-                if value_type != 'initial':
-                        print("success")
-                        log.status = 'success'
-                        log.save()
-                        return
-                else:
-                        break
+            if all(outputs) and value_type != 'initial':
+                print("success",log)
+                log.status = 'success'
+                log.save()
+                return
+            elif all(outputs) and value_type == 'initial':
+                break
             else:
                 print("sleep as case failed")
                 time.sleep(1)
@@ -102,7 +101,7 @@ class ScenarioUpdate:
         for log in TestExecutionLog.objects.filter(status='pending'):
             self.update_values_for_inputs(log, 'initial')
             self.update_log_status_from_output(log, 'initial')
-            log = TestExecutionLog.objects.filter(id=log.id)
+            log = TestExecutionLog.objects.filter(id=log.id)[0]
             if log.status != 'failure':
                 self.update_values_for_inputs(log)
                 self.update_log_status_from_output(log)
