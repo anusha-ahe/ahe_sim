@@ -23,7 +23,9 @@ class ScenarioUpdate:
         return combined_test_scenarios
 
     def start_servers(self):
+        print("device names", self.device_names)
         for device in self.device_names:
+            print("starting server for device", device)
             self.simulator.start_server(device)
             print("started server for device", device)
 
@@ -48,6 +50,7 @@ class ScenarioUpdate:
                 self.simulator.update_and_translate_values(inp.device.name, inp.variable.ahe_name, value)
 
     def compare_outputs(self, function, actual_output, expected_output):
+        print(function, actual_output, expected_output)
         if function == 'equal_to' and actual_output == expected_output:
             return True
         elif function == 'greater_than' and actual_output > expected_output:
@@ -64,25 +67,32 @@ class ScenarioUpdate:
 
     def update_log_status_from_output(self, log, value_type=None):
         start_time = time.time()
-        while time.time() - start_time <= log.test_scenario.timeout:
+        outputs = list()
+        print("start_time", start_time, log.test_scenario.timeout)
+        while time.time() - start_time <= log.test_scenario.timeout and log.status != 'failure':
             for out in Output.objects.filter(test_scenario=log.test_scenario):
                 actual_output = self.simulator.get_values(out.device.name, out.variable.map.name,
                                                           out.variable.ahe_name)
                 cmp = self.compare_outputs(out.initial_function, actual_output, out.initial_value) \
                     if value_type == 'initial' else self.compare_outputs(out.function, actual_output, out.value)
-                if cmp and value_type != 'initial':
-                    log.status = 'success'
-                    log.save()
-                    break
-                elif cmp and value_type == 'initial':
-                    break
+                print("here", cmp, value_type,out.variable.ahe_name)
+                outputs.append(cmp)
+                print("all outputs",outputs)
+            if all(outputs):
+                if value_type != 'initial':
+                        print("success")
+                        log.status = 'success'
+                        log.save()
+                        return
                 else:
-                    continue
+                        break
             else:
+                print("sleep as case failed")
                 time.sleep(1)
                 continue
-            break
+
         else:
+            print("timeout reached")
             log.status = 'failure'
             log.save()
 
@@ -92,8 +102,10 @@ class ScenarioUpdate:
         for log in TestExecutionLog.objects.filter(status='pending'):
             self.update_values_for_inputs(log, 'initial')
             self.update_log_status_from_output(log, 'initial')
-            self.update_values_for_inputs(log)
-            self.update_log_status_from_output(log)
+            log = TestExecutionLog.objects.filter(id=log.id)
+            if log.status != 'failure':
+                self.update_values_for_inputs(log)
+                self.update_log_status_from_output(log)
             if self.stop_device:
                 for device in self.stop_device:
                     self.simulator.start_server(device)
@@ -103,3 +115,4 @@ class ScenarioUpdate:
 if __name__ == '__main__':
     su = ScenarioUpdate()
     su.update_pending_test_log_status()
+    su.stop_servers()

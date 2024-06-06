@@ -69,10 +69,10 @@ class Simulation:
             for port, device_objects in devices_by_port.items():
                 for device_obj in device_objects:
                     device_name = device_obj.name
+                    print("device map",DeviceMap.objects.filter(device_type=device_obj.device_type),device_obj.device_type)
                     for device_map in DeviceMap.objects.filter(device_type=device_obj.device_type):
                         if not device_name in self.devices:
                             self.devices[device_name] = []
-                        print(self.devices, type(self.devices))
                         self.field_dict.setdefault(device_name, {})
                         self.get_field_dict.setdefault(device_name, {})
                         self.devices[device_name].append(device_map.map)
@@ -80,13 +80,11 @@ class Simulation:
                         for f in fields:
                             self.field_dict[device_name][f.field_address] = f.ahe_name
                             self.get_field_dict[device_name][f.ahe_name] = f
-                    print(device_name, port, type(self.processes))
                     self.processes.append((device_name, port))
         except Exception as e:
             print(f"Error setting up simulation: {e}")
 
     def start_server(self, device_name, timeout=None):
-        print("processes", self.processes)
         for device, port in self.processes:
             if device == device_name:
                 if timeout:
@@ -99,7 +97,6 @@ class Simulation:
                 process.start()
                 self.server_processes.setdefault(device_name, [])
                 self.server_processes[device_name].append(process)
-            print("server processes", self.server_processes)
 
 
     def stop_server(self, device_name):
@@ -111,5 +108,6 @@ class Simulation:
             print(f"process to stop {proc}")
             proc.terminate()
             proc.join()
+            print(f"Server for {device_name} stopped.")
         del self.server_processes[device_name]
-        print(f"Server for {device_name} stopped.")
+
