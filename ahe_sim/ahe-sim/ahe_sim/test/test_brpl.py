@@ -197,6 +197,7 @@ class SimTest(TestCase):
             self.scenario_update.update_log_status_from_output(log)
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0].status == 'success'
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0].status == 'success'
+        self.scenario_update.stop_servers()
 
 
 
