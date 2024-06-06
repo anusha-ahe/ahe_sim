@@ -22,16 +22,17 @@ class SimTest(TestCase):
         self.device_type3 = DeviceType.objects.get_or_create(name='SFERE 700m2 grid')[0]
         self.device_type4 = DeviceType.objects.get_or_create(name='SFERE 700m2 ess')[0]
         self.device_type5 = DeviceType.objects.get_or_create(name='phoenix')[0]
+        self.device_type6 = DeviceType.objects.get_or_create(name='Temperature Scanner')[0]
         self.map_obj1 = Map.objects.get_or_create(name='sma_sunny_island')[0]
         self.map_obj2 = Map.objects.get_or_create(name='ebick_bms')[0]
         self.map_obj3 = Map.objects.get_or_create(name='sfere_700m2_grid')[0]
         self.map_obj4 = Map.objects.get_or_create(name='sfere_700m2_ess')[0]
         self.map_obj5 = Map.objects.get_or_create(name='phoenix_ilc_171_eth_2_tx')[0]
+        self.map_obj6 = Map.objects.get_or_create(name='multispan_temperature_scanner')[0]
         DeviceMap.objects.get_or_create(map=self.map_obj2,device_type=self.device_type2,)
         DeviceMap.objects.get_or_create(map=self.map_obj5, device_type=self.device_type5, )
         DeviceMap.objects.get_or_create(map=self.map_obj4, device_type=self.device_type4, )
         DeviceMap.objects.get_or_create(map=self.map_obj3, device_type=self.device_type3, )
-
         self.inverter_1 = \
             SiteDevice.objects.get_or_create(device_type=self.device_type1, ip_address='0.0.0.0', port=5200, unit=3,
                                              name='inverter_1',
@@ -80,9 +81,14 @@ class SimTest(TestCase):
             SiteDevice.objects.get_or_create(device_type=self.device_type4, ip_address='0.0.0.0', port=5211, unit=1,
                                              name='ess_1',
                                              site_device_conf=self.site_device_conf)[0]
+        self.temp_scanner_1 = \
+            SiteDevice.objects.get_or_create(device_type=self.device_type6, ip_address='0.0.0.0', port=5212, unit=1,
+                                             name='temp_scanner_1',
+                                             site_device_conf=self.site_device_conf)[0]
         self.min_cell_voltage = Field.objects.get(map=self.map_obj2,ahe_name='min_cell_voltage')
         self.max_cell_voltage = Field.objects.get(map=self.map_obj2, ahe_name='max_cell_voltage')
         self.active_power = Field.objects.get(map=self.map_obj1, ahe_name='active_power')
+        self.pv_channel_1 = Field.objects.get(ahe_name='pv_channel_1', map=self.map_obj6)
         self.test_scenario1 = TestScenario.objects.get_or_create(name='turn off pcs1 when min_cell_voltage <= 2.8')[0]
         Input.objects.get_or_create(device=self.battery_1, test_scenario=self.test_scenario1,
                                     variable=self.min_cell_voltage,initial_value=2.9,value=2.8,function='equal_to')
@@ -99,6 +105,13 @@ class SimTest(TestCase):
         self.test_scenario3 = TestScenario.objects.get_or_create(name='turn off pcs1 when max_cell_voltage >= 3.6')[0]
         Input.objects.get_or_create(device=self.battery_1, test_scenario=self.test_scenario3,
                                     variable=self.max_cell_voltage, initial_value=3.6, value=3.8, function='equal_to')
+        Output.objects.get_or_create(variable=self.active_power, device=self.inverter_1,
+                                     test_scenario=self.test_scenario3,
+                                     value=0, function='equal_to',
+                                     initial_value=15)
+        self.test_scenario4 = TestScenario.objects.get_or_create(name='turn off pcs1 when temperature >= 45')[0]
+        Input.objects.get_or_create(device=self.temp_scanner_1, test_scenario=self.test_scenario4,
+                                    variable=self.pv_channel_1, initial_value=40, value=45, function='equal_to')
         Output.objects.get_or_create(variable=self.active_power, device=self.inverter_1,
                                      test_scenario=self.test_scenario3,
                                      value=0, function='equal_to',
@@ -173,7 +186,7 @@ class SimTest(TestCase):
         self.scenario_update.stop_servers()
 
 
-    def test_all_ex(self):
+    def test_log_success_for_all_test_case_examples(self):
         TestExecutionLog.objects.filter().delete()
         simulation = self.scenario_update.simulator
         self.scenario_update.create_test_log_for_test_scenarios()
@@ -191,6 +204,7 @@ class SimTest(TestCase):
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0].status == 'success'
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0].status == 'success'
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario3)[0].status == 'success'
+        assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario4)[0].status == 'success'
         self.scenario_update.stop_servers()
 
 
