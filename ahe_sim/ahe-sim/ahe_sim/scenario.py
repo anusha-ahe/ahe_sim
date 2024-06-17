@@ -11,7 +11,9 @@ class ScenarioUpdate:
         self.simulator = Simulation()
         self.simulator.initialize_servers()
         self.stop_device = list()
-        self.device_names = ahe_mb.models.SiteDevice.objects.values_list('name', flat=True).distinct()
+        self.device_names = ahe_mb.models.SiteDevice.objects.exclude(name__icontains='ems').values_list('name',
+                                                                                                        flat=True).distinct()
+        self.plc_devices = ahe_mb.models.SiteDevice.objects.filter(name__icontains='ems')
 
     def get_available_test_scenarios_for_simulator(self):
         distinct_device_ids = ahe_mb.models.SiteDevice.objects.values_list('id', flat=True).distinct()
@@ -21,7 +23,6 @@ class ScenarioUpdate:
         return combined_test_scenarios
 
     def start_servers(self):
-        print("device names", self.device_names)
         for device in self.device_names:
             print("starting server for device", device)
             self.simulator.start_server(device)
@@ -47,7 +48,6 @@ class ScenarioUpdate:
                 self.simulator.update_and_translate_values(inp.device.name, inp.variable.ahe_name, value)
 
     def compare_outputs(self, function, actual_output, expected_output):
-        print(function, actual_output, expected_output)
         if function == 'equal_to' and actual_output == expected_output:
             return True
         elif function == 'greater_than' and actual_output > expected_output:
@@ -65,17 +65,13 @@ class ScenarioUpdate:
     def update_log_status_from_output(self, log, value_type=None):
         start_time = time.time()
         outputs = list()
-        print("start_time", start_time, log.test_scenario.timeout)
         while time.time() - start_time <= log.test_scenario.timeout and log.status != 'failure':
             for out in Output.objects.filter(test_scenario=log.test_scenario):
                 actual_output = self.simulator.get(out.device.name,out.variable.ahe_name)
                 cmp = self.compare_outputs(out.initial_function, actual_output, out.initial_value) \
                     if value_type == 'initial' else self.compare_outputs(out.function, actual_output, out.value)
-                print("here", cmp, value_type, out.variable.ahe_name)
                 outputs.append(cmp)
-                print("all outputs", outputs)
             if all(outputs) and value_type != 'initial':
-                print("success", log)
                 log.status = 'success'
                 log.save()
                 return
@@ -95,7 +91,7 @@ class ScenarioUpdate:
         plc_status = []
         self.create_test_log_for_test_scenarios()
         self.start_servers()
-        for plc_device in ahe_mb.models.SiteDevice.objects.filter(name__icontains='ems'):
+        for plc_device in self.plc_devices:
             plc_health = PlcHealth(plc_device, self.simulator)
             plc_status.append(plc_health.get_plc_health_status())
         if all(plc_status):
@@ -111,7 +107,6 @@ class ScenarioUpdate:
                         self.simulator.start_server(device)
         else:
             print("plc health status failed ", plc_status)
-
 
 
 if __name__ == '__main__':

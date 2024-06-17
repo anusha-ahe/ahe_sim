@@ -88,23 +88,23 @@ DATABASES = {
 }
 
 print(DATABASES)
-# if os.getenv('AHE_DATABASE', '') == 'MYSQL':
-#     DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.mysql',
-#             'NAME': os.getenv('AHE_DB_NAME', 'ahe_action'),
-#             'USER': os.getenv('AHE_DB_USER', 'ahe_action'),
-#             'PASSWORD': os.getenv('DB_PASSWORD', 'ahe_action'),
-#             'HOST': os.getenv('AHE_DB_HOST', '127.0.0.1'),
-#             'PORT': os.getenv('AHE_DB_PORT', '3306'),
-#             'TEST': {
-#                 'NAME': f"test_{os.getenv('AHE_DB_NAME')}",
-#             },
-#             'OPTIONS': {
-#                 "init_command": "SET GLOBAL max_connections = 100000",  # <-- The fix
-#             }
-#         }
-#     }
+if os.getenv('AHE_DATABASE', '') == 'MYSQL':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.getenv('AHE_DB_NAME', 'ahe_action'),
+            'USER': os.getenv('AHE_DB_USER', 'ahe_action'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'ahe_action'),
+            'HOST': os.getenv('AHE_DB_HOST', '127.0.0.1'),
+            'PORT': os.getenv('AHE_DB_PORT', '3306'),
+            'TEST': {
+                'NAME': f"test_{os.getenv('AHE_DB_NAME')}",
+            },
+            'OPTIONS': {
+                "init_command": "SET GLOBAL max_connections = 100000",  # <-- The fix
+            }
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

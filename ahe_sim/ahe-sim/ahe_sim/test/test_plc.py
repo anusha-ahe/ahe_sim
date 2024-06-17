@@ -63,7 +63,7 @@ class SimTestPlc(TestCase):
         self.pv_channel_1 = Field.objects.get(ahe_name='pv_channel_1', map=self.map_obj6)
         self.simulator = Simulation()
         self.simulator.initialize_servers()
-        site_action = ahe_action.models.SiteActionConf.objects.get_or_create(site=self.site)
+        ahe_action.models.SiteActionConf.objects.get_or_create(site=self.site)
         action_input1 = ahe_action.models.ActionInput.objects.get_or_create(name='inverter discharge')
         ahe_action.models.Input.objects.get_or_create(action_input=action_input1[0], key='ems_1_man_active_power',
                                                       value='0', function='greater_than')
@@ -82,52 +82,26 @@ class SimTestPlc(TestCase):
         plc.simulator.start_server(self.ems_1.name)
         time.sleep(1)
         mb = ModbusMaster(self.ems_1, '', {"block_name": "test_1"})
-        mb.write({'ems_1_inverter_1_status': 1, 'ems_1_battery_1_status':1,  'ems_1_battery_2_status':1})
+        mb.write({'ems_1_inverter_1_status': 1, 'ems_1_battery_1_status': 1, 'ems_1_battery_2_status': 1})
         status = plc.can_connect_to_all_devices()
         print("test case status", status)
         assert status['battery_1'] == 1
         assert status['battery_2'] == 1
         assert status['inverter_1'] == 1
-        # for dev in plc.connected_devices:
-        #     plc.simulator.stop_server(dev.name)
-        # plc.simulator.stop_server(self.ems_1.name)
+        for dev in plc.connected_devices:
+            plc.simulator.stop_server(dev.name)
+        plc.simulator.stop_server(self.ems_1.name)
 
-    def test_plc_can_not_connect_to_all_devices(self):
+    def test_plc_can_not_to_connect_to_all_devices(self):
         plc = PlcHealth(self.ems_1, self.simulator)
         for dev in plc.connected_devices:
             plc.simulator.start_server(dev.name)
         plc.simulator.start_server(self.ems_1.name)
+        time.sleep(1)
+        mb = ModbusMaster(self.ems_1, '', {"block_name": "test_1"})
+        mb.write({'ems_1_battery_1_status': 1, 'ems_1_battery_2_status': 1})
         status = plc.can_connect_to_all_devices()
-        assert status['battery_1'] == 0
-        assert status['battery_2'] == 0
-        assert status['inverter_1'] == 0
+        assert status['inverter_1'] == False
         for dev in plc.connected_devices:
             plc.simulator.stop_server(dev.name)
         plc.simulator.stop_server(self.ems_1.name)
-
-    def test_validate_device_when_discharging(self):
-        plc = PlcHealth(self.ems_1, self.simulator)
-        for dev in plc.connected_devices:
-            plc.simulator.start_server(dev.name)
-        plc.simulator.start_server(self.ems_1.name)
-        plc.simulator.set_value('ems_1', 'man_active_power_setpoint', 1)
-        plc.simulator.set_value('inverter_1', 'active_power', 100)
-        validation = plc.validate_device(self.inverter_1, 'discharging')
-        assert validation
-        for dev in plc.connected_devices:
-            plc.simulator.stop_server(dev.name)
-        plc.simulator.stop_server(self.ems_1.name)
-
-    def test_validate_device_when_stop_charging(self):
-        plc = PlcHealth(self.ems_1, self.simulator)
-        for dev in plc.connected_devices:
-            plc.simulator.start_server(dev.name)
-        plc.simulator.start_server(self.ems_1.name)
-        plc.simulator.set_value('ems_1', 'man_active_power_setpoint', 0)
-        validation = plc.validate_device(self.inverter_1)
-        assert validation
-        for dev in plc.connected_devices:
-            plc.simulator.stop_server(dev.name)
-        plc.simulator.stop_server(self.ems_1.name)
-
-

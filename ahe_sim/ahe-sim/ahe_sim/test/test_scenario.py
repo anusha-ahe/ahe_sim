@@ -113,3 +113,10 @@ class SimTest(TestCase):
             self.scenario_update.update_values_for_inputs(log)
             self.scenario_update.update_log_status_from_output(log)
             assert log.status == 'success'
+
+
+    def test_update_pending_test_log_status(self):
+        self.scenario_update.update_pending_test_log_status()
+        for log in TestExecutionLog.objects.filter():
+            assert log.status != 'pending'
+

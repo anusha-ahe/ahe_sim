@@ -3,6 +3,7 @@ from pymodbus.client import ModbusTcpClient
 from ahe_mb.models import SiteDevice, DeviceMap, Field
 from ahe_mb.master import ModbusMaster
 
+
 class PlcHealth:
     def __init__(self, plc, simulator):
         self.plc = plc
@@ -25,7 +26,7 @@ class PlcHealth:
         mm = ModbusMaster(self.plc, '', {'block_name': 'test'})
         for i in range(len(mm.queries)):
             plc_data.update(mm.read(int(time.time())))
-        print("plc_data", plc_data)
+        print("plc_data", plc_data, len(mm.queries))
         for dev in self.connected_devices:
             status[f"{dev.name}"] = None
             if f"{self.plc.name}_{dev.name}_status" in plc_data and \
@@ -39,23 +40,6 @@ class PlcHealth:
                 status[f"{dev.name}"] = False
         return status
 
-    def validate_device(self, device, value_type=None):
-        """Validate the device status based on the active power mode and setpoint."""
-        self.simulator.set_value(self.plc.name, 'active_power_mode', self.plc.active_power_mode)
-        if value_type is not None:
-            setpoint = self.plc.value
-        else:
-            setpoint = 0
-        self.simulator.set_value(self.plc.name, 'man_active_power_setpoint', setpoint)
-        """sleep for a second before checking if plc was able to write the command"""
-        time.sleep(1)
-        p_setpoint = self.simulator.get(device.name, self.plc.variable.ahe_name)
-        if value_type is not None and p_setpoint != 0:
-            return True
-        elif value_type is None and p_setpoint == 0:
-            return True
-        return False
-
     def get_plc_health_status(self):
         if self.is_reachable():
             read_status = self.can_connect_to_all_devices()
@@ -66,4 +50,3 @@ class PlcHealth:
                 return False
         else:
             print(f"{self.plc.name} is unreachable")
-
