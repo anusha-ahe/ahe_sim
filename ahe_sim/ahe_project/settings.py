@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'ahe_translate',
     'ahe_mb',
+    'ahe_action',
     'ahe_sim']
 
 MIDDLEWARE = [

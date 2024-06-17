@@ -1,5 +1,4 @@
 from django.db import models
-
 from ahe_mb.models import Map, Field, SiteDevice
 
 # Create your models here.
@@ -11,11 +10,11 @@ STATUS_CHOICES = [
 ]
 
 FUNCTION_CHOICES = [("less_than", "less_than"),
-                   ("less_than_equal_to", "less_than_equal_to"),
-                   ("greater_than", "greater_than"),
-                   ("greater_than_equal_to", "greater_than_equal_to"),
-                   ("equal_to", "equal_to"),
-                    ("not_equal_to", "not_equal_to"),]
+                    ("less_than_equal_to", "less_than_equal_to"),
+                    ("greater_than", "greater_than"),
+                    ("greater_than_equal_to", "greater_than_equal_to"),
+                    ("equal_to", "equal_to"),
+                    ("not_equal_to", "not_equal_to"), ]
 
 
 class SimulatorConfig(models.Model):
@@ -31,17 +30,18 @@ class TestScenario(models.Model):
 
 
 class Input(models.Model):
-    test_scenario = models.ForeignKey(TestScenario,related_name='inputs', on_delete=models.CASCADE)
-    variable = models.ForeignKey(Field, on_delete=models.CASCADE,default=None,blank=True)
-    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE,default=None,blank=True)
+    test_scenario = models.ForeignKey(TestScenario, related_name='inputs', on_delete=models.CASCADE)
+    variable = models.ForeignKey(Field, on_delete=models.CASCADE, default=None, blank=True)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None, blank=True)
     function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default=None)
     value = models.FloatField(default=0)
     initial_value = models.FloatField(default=0)
 
+
 class Output(models.Model):
     test_scenario = models.ForeignKey(TestScenario, related_name='outputs', on_delete=models.CASCADE)
-    variable = models.ForeignKey(Field, on_delete=models.CASCADE,default=None,blank=True)
-    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None,blank=True)
+    variable = models.ForeignKey(Field, on_delete=models.CASCADE, default=None, blank=True)
+    device = models.ForeignKey(SiteDevice, on_delete=models.CASCADE, default=None, blank=True)
     value = models.FloatField(default=0)
     function = models.CharField(max_length=50, choices=FUNCTION_CHOICES, default='equal_to')
     initial_value = models.FloatField(default=0)

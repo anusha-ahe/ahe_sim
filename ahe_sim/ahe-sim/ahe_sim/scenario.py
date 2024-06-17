@@ -1,17 +1,15 @@
 import time
-
 from django.db.models import Q
-
 import ahe_mb.models
 from ahe_sim.models import TestExecutionLog, Input, Output, TestScenario
 from ahe_sim.sim import Simulation
+from ahe_sim.plc_health import PlcHealth
 
 
 class ScenarioUpdate:
     def __init__(self):
         self.simulator = Simulation()
         self.simulator.initialize_servers()
-        self.input = dict()
         self.stop_device = list()
         self.device_names = ahe_mb.models.SiteDevice.objects.values_list('name', flat=True).distinct()
 
@@ -33,7 +31,6 @@ class ScenarioUpdate:
         for device in self.device_names:
             self.simulator.stop_server(device)
             print("stopped server for device", device)
-
 
     def create_test_log_for_test_scenarios(self):
         test_scenarios = self.get_available_test_scenarios_for_simulator()
@@ -71,15 +68,14 @@ class ScenarioUpdate:
         print("start_time", start_time, log.test_scenario.timeout)
         while time.time() - start_time <= log.test_scenario.timeout and log.status != 'failure':
             for out in Output.objects.filter(test_scenario=log.test_scenario):
-                actual_output = self.simulator.get_values(out.device.name, out.variable.map.name,
-                                                          out.variable.ahe_name)
+                actual_output = self.simulator.get(out.device.name,out.variable.ahe_name)
                 cmp = self.compare_outputs(out.initial_function, actual_output, out.initial_value) \
                     if value_type == 'initial' else self.compare_outputs(out.function, actual_output, out.value)
-                print("here", cmp, value_type,out.variable.ahe_name)
+                print("here", cmp, value_type, out.variable.ahe_name)
                 outputs.append(cmp)
-                print("all outputs",outputs)
+                print("all outputs", outputs)
             if all(outputs) and value_type != 'initial':
-                print("success",log)
+                print("success", log)
                 log.status = 'success'
                 log.save()
                 return
@@ -96,18 +92,25 @@ class ScenarioUpdate:
             log.save()
 
     def update_pending_test_log_status(self):
+        plc_status = []
         self.create_test_log_for_test_scenarios()
         self.start_servers()
-        for log in TestExecutionLog.objects.filter(status='pending'):
-            self.update_values_for_inputs(log, 'initial')
-            self.update_log_status_from_output(log, 'initial')
-            log = TestExecutionLog.objects.filter(id=log.id)[0]
-            if log.status != 'failure':
-                self.update_values_for_inputs(log)
-                self.update_log_status_from_output(log)
-            if self.stop_device:
-                for device in self.stop_device:
-                    self.simulator.start_server(device)
+        for plc_device in ahe_mb.models.SiteDevice.objects.filter(name__icontains='ems'):
+            plc_health = PlcHealth(plc_device, self.simulator)
+            plc_status.append(plc_health.get_plc_health_status())
+        if all(plc_status):
+            for log in TestExecutionLog.objects.filter(status='pending'):
+                self.update_values_for_inputs(log, 'initial')
+                self.update_log_status_from_output(log, 'initial')
+                log = TestExecutionLog.objects.filter(id=log.id)[0]
+                if log.status != 'failure':
+                    self.update_values_for_inputs(log)
+                    self.update_log_status_from_output(log)
+                if self.stop_device:
+                    for device in self.stop_device:
+                        self.simulator.start_server(device)
+        else:
+            print("plc health status failed ", plc_status)
 
 
 

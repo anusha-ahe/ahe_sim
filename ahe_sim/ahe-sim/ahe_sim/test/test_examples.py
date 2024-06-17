@@ -59,7 +59,6 @@ class SimTest(TestCase):
         simulation.set_value('inverter_1', 'p_setpoint_w', 1000)
         simulation.set_value('inverter_1', 'number_of_connected_sub_slaves', 10)
         assert simulation.data['inverter_1']['p_setpoint_w'] == 1
-
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
         simulation.set_value('inverter_1', 'p_setpoint_w', 0)

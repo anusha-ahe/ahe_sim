@@ -52,11 +52,11 @@ class SimTest(TestCase):
         self.scenario_update.create_test_log_for_test_scenarios()
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
         self.scenario_update.start_servers()
-        self.scenario_update.update_values_for_inputs(log,'initial')
+        self.scenario_update.update_values_for_inputs(log, 'initial')
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             simulation.set_value(server_identity, 'test_field4', 5)
-        self.scenario_update.update_log_status_from_output(log,'initial')
+        self.scenario_update.update_log_status_from_output(log, 'initial')
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             data = simulation.data[server_identity]

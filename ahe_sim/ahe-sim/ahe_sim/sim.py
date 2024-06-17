@@ -37,10 +37,10 @@ class Simulation:
                 self.slaves[server_identity].getValues(3, address, count=1)[0]
         return self.data
 
-    def get_values(self, server_identity, map_name, name):
+    def get(self, server_identity,name):
         address = self.get_field_dict[server_identity][name]
         value = self.slaves[server_identity].getValues(3, address.field_address, count=1)[0]
-        self.data[server_identity][f"{map_name}_{name}"] = value
+        self.data[server_identity][name] = value
         return value
 
     def set_value(self, server_identity, ahe_name, value):
@@ -85,6 +85,7 @@ class Simulation:
             print(f"Error setting up simulation: {e}")
 
     def start_server(self, device_name, timeout=None):
+        print("process", self.processes)
         for device, port in self.processes:
             if device == device_name:
                 if timeout:
@@ -95,6 +96,7 @@ class Simulation:
                 print(f"start server for {device_name} {port}")
                 process = multiprocessing.Process(target=run_slave, args=(self.server_context[device_name], port, device_name))
                 process.start()
+                print(f"started server for {device_name} {port}")
                 self.server_processes.setdefault(device_name, [])
                 self.server_processes[device_name].append(process)
 
