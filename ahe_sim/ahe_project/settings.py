@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'ahe_translate',
     'ahe_mb',
-    'ahe_action',
     'ahe_sim']
 
 MIDDLEWARE = [
@@ -81,20 +80,11 @@ WSGI_APPLICATION = 'ahe_project.wsgi.application'
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-print(DATABASES)
-if os.getenv('AHE_DATABASE', '') == 'MYSQL':
-    DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('AHE_DB_NAME', 'ahe_action'),
-            'USER': os.getenv('AHE_DB_USER', 'ahe_action'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'ahe_action'),
+            'NAME': os.getenv('AHE_DB_NAME', 'ahe'),
+            'USER': os.getenv('AHE_DB_USER', 'ahe'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'ahe'),
             'HOST': os.getenv('AHE_DB_HOST', '127.0.0.1'),
             'PORT': os.getenv('AHE_DB_PORT', '3306'),
             'TEST': {

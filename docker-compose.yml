@@ -6,9 +6,17 @@ services:
     image: sim
     container_name: sim
     command: ["python3", "manage.py", "runserver", "0.0.0.0:8100"]
+    restart: always
     ports:
       - "5000-5050:5000-5050"
       - "8100:8100"
       - "5200-5250:5200-5250"
+    network_mode: "host"
+    extra_hosts:
+      - "mysql:127.0.0.1"
     environment:
       - DJANGO_SETTINGS_MODULE=ahe_project.settings
+      - AHE_DB_HOST=127.0.0.1
+      - AHE_DB_USER=ahe
+      - AHE_DATABASE=mysql
+      - DB_PASSWOR=ahe
