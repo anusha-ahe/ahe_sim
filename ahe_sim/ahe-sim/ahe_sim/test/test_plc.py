@@ -20,7 +20,7 @@ class SimTestPlc(TestCase):
         SiteDevice.objects.filter().delete()
         self.client = AheClient.objects.get_or_create(name='test')[0]
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
-        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
+        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site, version=1)[0]
         self.device_type1 = DeviceType.objects.get_or_create(name='SMA sunny_island pcs')[0]
         self.device_type2 = DeviceType.objects.get_or_create(name='ebick_bms')[0]
         self.device_type3 = DeviceType.objects.get_or_create(name='SFERE 700m2 grid')[0]
@@ -63,10 +63,6 @@ class SimTestPlc(TestCase):
         self.pv_channel_1 = Field.objects.get(ahe_name='pv_channel_1', map=self.map_obj6)
         self.simulator = Simulation()
         self.simulator.initialize_servers()
-        ahe_action.models.SiteActionConf.objects.get_or_create(site=self.site)
-        action_input1 = ahe_action.models.ActionInput.objects.get_or_create(name='inverter discharge')
-        ahe_action.models.Input.objects.get_or_create(action_input=action_input1[0], key='ems_1_man_active_power',
-                                                      value='0', function='greater_than')
 
     def test_connection_plc(self):
         plc = PlcHealth(self.ems_1, self.simulator)

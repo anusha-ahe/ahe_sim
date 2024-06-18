@@ -19,7 +19,7 @@ class SimTest(TestCase):
         self.device_map = DeviceMap.objects.get_or_create(device_type=self.device_type, map=self.map_obj)
         self.client = AheClient.objects.get_or_create(name='test')[0]
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
-        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
+        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site, version=1)[0]
         self.device = \
         SiteDevice.objects.get_or_create(device_type=self.device_type, ip_address='0.0.0.0', port=5234, unit=1,name='test_1',
                                          site_device_conf=self.site_device_conf)[0]

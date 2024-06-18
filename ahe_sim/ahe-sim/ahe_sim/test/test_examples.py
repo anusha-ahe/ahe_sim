@@ -16,7 +16,7 @@ class SimTest(TestCase):
         SiteDevice.objects.filter().delete()
         self.client = AheClient.objects.get_or_create(name='test')[0]
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
-        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
+        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site, version=1)[0]
         self.device_type1 = DeviceType.objects.get(name='Enervenue Battery')
         self.device_type2= DeviceType.objects.get(name='Trumpf AC 3025')
         self.map_obj1 = Map.objects.get(name='enervenue_battery_map')

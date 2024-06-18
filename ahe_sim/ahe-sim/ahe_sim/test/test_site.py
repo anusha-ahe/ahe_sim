@@ -16,7 +16,7 @@ class SimTest(TestCase):
         SiteDevice.objects.filter().delete()
         self.client = AheClient.objects.get_or_create(name='test')[0]
         self.site = Site.objects.get_or_create(name='test', client=self.client)[0]
-        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site)[0]
+        self.site_device_conf = SiteDeviceList.objects.get_or_create(site=self.site, version=1)[0]
         self.device_type1 = DeviceType.objects.get_or_create(name='SMA sunny_island pcs')[0]
         self.device_type2= DeviceType.objects.get_or_create(name='ebick_bms')[0]
         self.device_type3 = DeviceType.objects.get_or_create(name='SFERE 700m2 grid')[0]

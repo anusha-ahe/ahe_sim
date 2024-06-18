@@ -69,7 +69,6 @@ class Simulation:
             for port, device_objects in devices_by_port.items():
                 for device_obj in device_objects:
                     device_name = device_obj.name
-                    print("device map",DeviceMap.objects.filter(device_type=device_obj.device_type),device_obj.device_type)
                     for device_map in DeviceMap.objects.filter(device_type=device_obj.device_type):
                         if not device_name in self.devices:
                             self.devices[device_name] = []
