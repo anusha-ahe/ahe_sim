@@ -84,7 +84,6 @@ class ScenarioUpdate:
         if 'ems' in out.device.name:
             plc_health = PlcHealth(out.device, self.simulator)
             plc_data = plc_health.get_plc_data()
-            print('plc_data')
             return plc_data[f"{out.device.name}_{out.variable.ahe_name}"]
         return self.simulator.get(out.device.name, out.variable.ahe_name)
 
@@ -108,7 +107,7 @@ class ScenarioUpdate:
             if all(plc_status):
                 self.process_log(log)
             else:
-                log.status = 'plc_failure'
+                log.status = 'plc_connection_failure'
                 log.save()
                 print(f"PLC health status failure for devices: {plc_status}")
 
