@@ -79,7 +79,6 @@ class SimTestPlc(TestCase):
         mb = ModbusMaster(self.ems_1, '', {"block_name": "test_1"})
         mb.write({'ems_1_inverter_1_status': 1, 'ems_1_battery_1_status': 1, 'ems_1_battery_2_status': 1})
         status = plc.can_connect_to_all_devices()
-        print("test case status", status)
         assert status['battery_1'] == 1
         assert status['battery_2'] == 1
         assert status['inverter_1'] == 1
@@ -100,3 +99,11 @@ class SimTestPlc(TestCase):
         for dev in plc.connected_devices:
             plc.simulator.stop_server(dev.name)
         plc.simulator.stop_server(self.ems_1.name)
+        assert not plc.get_plc_health_status()
+
+    def test_failed_plc_health_status_when_plc_is_not_reachable(self):
+        plc = PlcHealth(self.ems_1, self.simulator)
+        assert not plc.get_plc_health_status()
+
+
+

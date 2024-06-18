@@ -126,7 +126,6 @@ class SimTest(TestCase):
         self.scenario_update.start_servers()
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
         simulation.set_value('inverter_1', 'active_power', 1000)
-        print("active_power",simulation.data['inverter_1']['active_power'])
         assert simulation.data['inverter_1']['active_power'] == 15
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
@@ -139,12 +138,10 @@ class SimTest(TestCase):
         log2= TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
         simulation.set_value('inverter_2', 'active_power', 1000)
         assert simulation.data['inverter_2']['active_power'] == 15
-        print("set value for active_power",simulation.data['inverter_2']['active_power'] )
         self.scenario_update.update_values_for_inputs(log2, 'initial')
         self.scenario_update.update_log_status_from_output(log2, 'initial')
         simulation.set_value('inverter_2', 'active_power', 0)
         assert simulation.data['inverter_2']['active_power'] == 0
-        print("set intial value to 0")
         self.scenario_update.update_values_for_inputs(log2)
         self.scenario_update.update_log_status_from_output(log2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)

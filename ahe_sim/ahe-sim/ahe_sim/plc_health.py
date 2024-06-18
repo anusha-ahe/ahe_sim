@@ -19,14 +19,17 @@ class PlcHealth:
         connection = client.connect()
         return connection
 
-    def can_connect_to_all_devices(self):
+    def get_plc_data(self):
         plc_data = dict()
-        status = dict()
-        print(self.connected_devices, "connected_devices", len(self.fields))
         mm = ModbusMaster(self.plc, '', {'block_name': 'test'})
         for i in range(len(mm.queries)):
             plc_data.update(mm.read(int(time.time())))
-        print("plc_data", plc_data, len(mm.queries))
+            print("plc_data", plc_data, len(mm.queries))
+        return plc_data
+
+    def can_connect_to_all_devices(self):
+        plc_data = self.get_plc_data()
+        status = dict()
         for dev in self.connected_devices:
             status[f"{dev.name}"] = None
             if f"{self.plc.name}_{dev.name}_status" in plc_data and \
@@ -50,3 +53,4 @@ class PlcHealth:
                 return False
         else:
             print(f"{self.plc.name} is unreachable")
+            return False
