@@ -82,10 +82,10 @@ WSGI_APPLICATION = 'ahe_project.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': os.getenv('AHE_DB_NAME', 'ahe'),
-            'USER': os.getenv('AHE_DB_USER', 'ahe'),
-            'PASSWORD': os.getenv('DB_PASSWORD', 'ahe'),
-            'HOST': os.getenv('AHE_DB_HOST', '127.0.0.1'),
+            'NAME':  'ahe',
+            'USER':  'ahe',
+            'PASSWORD': 'ahe',
+            'HOST': '10.10.8.2',
             'PORT': os.getenv('AHE_DB_PORT', '3306'),
             'TEST': {
                 'NAME': f"test_{os.getenv('AHE_DB_NAME')}",

@@ -9,7 +9,6 @@ from ahe_sim.plc_health import PlcHealth
 class ScenarioUpdate:
     def __init__(self):
         self.simulator = Simulation()
-        self.simulator.initialize_servers()
         self.stop_device = list()
         self.device_names = ahe_mb.models.SiteDevice.objects.exclude(name__icontains='ems').values_list('name',
                                                                                                         flat=True).distinct()

@@ -19,12 +19,7 @@ class Simulation:
         self.i = 1
         self.processes = []
         self.devices = dict()
-
-    def set_server_context(self, server_identity, data_block_size):
-        data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
-        store = ModbusSlaveContext(hr=data_block)
-        self.server_context[server_identity] = ModbusServerContext(slaves=store, single=True)
-        self.slaves[server_identity] = store
+        self.initialize_servers()
 
     def set_all_initial_values_to_0(self, server_identity):
         if server_identity not in self.data:
@@ -36,25 +31,6 @@ class Simulation:
             self.data[server_identity][name] = \
                 self.slaves[server_identity].getValues(3, address, count=1)[0]
         return self.data
-
-    def get(self, server_identity,name):
-        address = self.get_field_dict[server_identity][name]
-        value = self.slaves[server_identity].getValues(3, address.field_address, count=1)[0]
-        self.data[server_identity][name] = value
-        return value
-
-    def set_value(self, server_identity, ahe_name, value):
-        field = self.get_field_dict[server_identity][ahe_name]
-        register_address = field.field_address
-        modbus_var = ModbusVar(field)
-        modbus_var.set_value(value)
-        self.slaves[server_identity].setValues(3, register_address, modbus_var.registers)
-        self.data[server_identity][f"{field.ahe_name}"] = \
-            self.slaves[server_identity].getValues(3, register_address, count=1)[0]
-        print(f"Value set for {server_identity} for {field.ahe_name} with {modbus_var.registers}")
-
-    def update_and_translate_values(self, server_identity, ahe_name, value):
-        self.set_value(server_identity, ahe_name, value)
 
     def initialize_servers(self):
         devices_by_port = {}
@@ -82,6 +58,32 @@ class Simulation:
                     self.processes.append((device_name, port))
         except Exception as e:
             print(f"Error setting up simulation: {e}")
+
+    def set_server_context(self, server_identity, data_block_size):
+        data_block = ModbusSequentialDataBlock(0, [0] * data_block_size)
+        store = ModbusSlaveContext(hr=data_block)
+        self.server_context[server_identity] = ModbusServerContext(slaves=store, single=True)
+        self.slaves[server_identity] = store
+
+    def get(self, server_identity,name):
+        address = self.get_field_dict[server_identity][name]
+        value = self.slaves[server_identity].getValues(3, address.field_address, count=1)[0]
+        self.data[server_identity][name] = value
+        return value
+
+    def set_value(self, server_identity, ahe_name, value):
+        field = self.get_field_dict[server_identity][ahe_name]
+        register_address = field.field_address
+        modbus_var = ModbusVar(field)
+        modbus_var.set_value(value)
+        self.slaves[server_identity].setValues(3, register_address, modbus_var.registers)
+        self.data[server_identity][f"{field.ahe_name}"] = \
+            self.slaves[server_identity].getValues(3, register_address, count=1)[0]
+        print(f"Value set for {server_identity} for {field.ahe_name} with {modbus_var.registers}")
+
+    def update_and_translate_values(self, server_identity, ahe_name, value):
+        self.set_value(server_identity, ahe_name, value)
+
 
     def start_server(self, device_name, timeout=None):
         print("process", self.processes)

@@ -62,7 +62,6 @@ class SimTestPlc(TestCase):
         self.active_power = Field.objects.get(map=self.map_obj1, ahe_name='active_power')
         self.pv_channel_1 = Field.objects.get(ahe_name='pv_channel_1', map=self.map_obj6)
         self.simulator = Simulation()
-        self.simulator.initialize_servers()
 
     def test_connection_plc(self):
         plc = PlcHealth(self.ems_1, self.simulator)

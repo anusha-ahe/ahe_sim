@@ -101,16 +101,16 @@ class ModbusVar:
     def _create_decoder(self):
         if self.modbus_field.field_encoding in [None, '', 'BB', 'ABCD', 'Big-endian']:
             return BinaryPayloadDecoder.fromRegisters(
-                self.registers, byteorder=Endian.Big, wordorder=Endian.Big)
+                self.registers, byteorder=Endian.BIG, wordorder=Endian.BIG)
         elif self.modbus_field.field_encoding in ['BL', 'CDAB', 'Little-endian byte swap']:
             return BinaryPayloadDecoder.fromRegisters(
-                self.registers, byteorder=Endian.Big, wordorder=Endian.Little)
+                self.registers, byteorder=Endian.BIG, wordorder=Endian.LITTLE)
         elif self.modbus_field.field_encoding in ['LL', 'DCBA', 'Little-endian']:
             return BinaryPayloadDecoder.fromRegisters(
-                self.registers, byteorder=Endian.Little, wordorder=Endian.Little)
+                self.registers, byteorder=Endian.LITTLE, wordorder=Endian.LITTLE)
         elif self.modbus_field.field_encoding in ['LB', 'BADC', 'Big-endian byte swap']:
             return BinaryPayloadDecoder.fromRegisters(
-                self.registers, byteorder=Endian.Little, wordorder=Endian.Big)
+                self.registers, byteorder=Endian.LITTLE, wordorder=Endian.BIG)
         else:
             raise KeyError
 

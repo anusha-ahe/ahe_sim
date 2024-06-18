@@ -79,7 +79,6 @@ class SimTest(TestCase):
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2}}
         self.simulation.devices = {"server_identity": [self.map_obj.name]}
-        self.simulation.initialize_servers()
         self.simulation.start_server("server_identity")
         time.sleep(2)
         client = ModbusTcpClient('0.0.0.0', 5232)
