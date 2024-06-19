@@ -28,6 +28,9 @@ class TestScenario(models.Model):
     enable = models.BooleanField(default=True)
     priority = models.IntegerField(default=1)
 
+    def __str__(self):
+        return self.name
+
 
 class Input(models.Model):
     test_scenario = models.ForeignKey(TestScenario, related_name='inputs', on_delete=models.CASCADE)
