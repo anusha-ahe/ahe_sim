@@ -7,6 +7,12 @@ INPUT_FN_CHOICES = [('', ''),
                     ('communication_error', 'communication_error')]
 
 
+class DeviceForm(forms.ModelForm):
+    class Meta:
+        model = SiteDevice
+        fields = ['site_device_conf','name', 'device_type', 'ip_address', 'port', 'unit', 'data_hold_period']
+
+
 class TestScenarioForm(forms.ModelForm):
     class Meta:
         model = TestScenario
@@ -17,7 +23,7 @@ class InputForm(forms.ModelForm):
     device = forms.ModelChoiceField(
         queryset=SiteDevice.objects.all(),
         required=True,
-        widget=forms.Select(attrs={'onchange': 'fetchVariables(this.value, input-variable);'})
+        widget=forms.Select(attrs={'id': 'id_input-device'})
     )
     variable = forms.ModelChoiceField(
         queryset=Field.objects.none(),
@@ -49,7 +55,7 @@ class OutputForm(forms.ModelForm):
     device = forms.ModelChoiceField(
         queryset=SiteDevice.objects.all(),
         required=True,
-        widget=forms.Select(attrs={'onchange': 'fetchVariables(this.value, "output-variable");'})
+        widget=forms.Select(attrs={'id': 'id_output-device'})
     )
     variable = forms.ModelChoiceField(
         queryset=Field.objects.none(),

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Scenarios</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Test Scenario Details</h1>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Timeout</th>
+                    <th>Input</th>
+                    <th>Output</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Javascript-->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailsModalLabel">Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped" id="detailsTable">
+                        <thead>
+                            <!-- Table Headers -->
+                        </thead>
+                        <tbody>
+                            <!-- Table Details -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var tests = JSON.parse('{{ tests|escapejs }}');
+            var tableBody = $('table tbody');
+            tests.forEach(function(test) {
+                var inputDetails = JSON.stringify(test.inputs);
+                var outputDetails = JSON.stringify(test.outputs);
+
+                tableBody.append(
+                    '<tr>' +
+                    '<td>' + test.id + '</td>' +
+                    '<td>' + test.name + '</td>' +
+                    '<td>' + test.timeout + '</td>' +
+                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + inputDetails + ', "input")\'>Input Details</button></td>' +
+                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + outputDetails + ', "output")\'>Output Details</button></td>' +
+                    '</tr>'
+                );
+            });
+        });
+
+        function showDetails(details, type) {
+            var tableHead = $('#detailsTable thead');
+            var tableBody = $('#detailsTable tbody');
+            // Clear any existing content
+            tableHead.empty();
+            tableBody.empty();
+
+            // Parse the JSON string into an object
+            if (typeof details === 'string') {
+                details = JSON.parse(details);
+            }
+
+            if (type === 'input') {
+                tableHead.append('<tr><th>ID</th><th>Variable</th><th>Value</th><th>Initial Value</th><th>Function</th></tr>');
+                details.forEach(function(input) {
+                    tableBody.append(
+                        '<tr><td>' + input.id + '</td><td>' + input.variable + '</td><td>' + input.value + '</td><td>' +
+                        input.initial_value + '</td><td>' + input.function + '</td></tr>'
+                    );
+                });
+            } else {
+                tableHead.append('<tr><th>ID</th><th>Variable</th><th> Initial Value</th><th>Initial Function</th><th>Value</th><th>Function</th></tr>');
+                details.forEach(function(output) {
+                    tableBody.append(
+                        '<tr><td>' + output.id + '</td><td>' + output.variable + '</td><td>' + output.initial_value +
+                         '</td><td>' + output.initial_function + '</td><td>' + output.value + '</td><td>' + output.function + '</td></tr>'
+                    );
+                });
+            }
+
+            $('#detailsModal').modal('show');
+        }
+    </script>
+</body>
+</html>

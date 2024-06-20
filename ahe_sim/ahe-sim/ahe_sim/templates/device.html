@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Scenarios</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Ip Address</th>
+                    <th>Port</th>
+                    <th>Device Type</th>
+                    <th>Unit</th>
+                    <th>DataHoldPeriod</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dev in devices %}
+            <tr>
+                        <td>{{ dev.id }}</td>
+                        <td>{{ dev.name }}</td>
+                        <td>{{ dev.ip_address }}</td>
+                        <td>{{ dev.port }}</td>
+                        <td>{{ dev.device_type }}</td>
+                        <td>{{ dev.unit }}</td>
+                        <td>{{ dev.data_hold_period }}</td>
+
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <h1>Add Device</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ device_form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
