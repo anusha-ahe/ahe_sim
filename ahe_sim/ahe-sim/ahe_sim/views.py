@@ -13,14 +13,6 @@ from .serializers import TestScenarioSerializer, TestExecutionLogSerializer
 from .forms import InputForm, OutputForm, TestScenarioForm, DeviceForm
 from ahe_mb.models import SiteDevice, DeviceMap, Field
 
-def convert_ordered_dict_to_dict(obj):
-    if isinstance(obj, OrderedDict):
-        return {k: convert_ordered_dict_to_dict(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_ordered_dict_to_dict(i) for i in obj]
-    else:
-        return obj
-
 
 class TestScenarioViewSet(viewsets.ModelViewSet):
     queryset = TestScenario.objects.all()
