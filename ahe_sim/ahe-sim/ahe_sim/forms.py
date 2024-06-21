@@ -10,13 +10,13 @@ INPUT_FN_CHOICES = [('', ''),
 class DeviceForm(forms.ModelForm):
     class Meta:
         model = SiteDevice
-        fields = ['site_device_conf','name', 'device_type', 'ip_address', 'port', 'unit', 'data_hold_period']
+        fields = ['site_device_conf', 'name', 'device_type', 'ip_address', 'port', 'unit', 'data_hold_period']
 
 
 class TestScenarioForm(forms.ModelForm):
     class Meta:
         model = TestScenario
-        fields = ['name', 'timeout', 'enable', 'priority']
+        fields = ['name', 'timeout']
 
 
 class InputForm(forms.ModelForm):
@@ -27,15 +27,16 @@ class InputForm(forms.ModelForm):
     )
     variable = forms.ModelChoiceField(
         queryset=Field.objects.none(),
-        required=False
+        required=False,
+        widget=forms.Select(attrs={'id': 'id_input-variable'})
     )
     function = forms.ChoiceField(choices=INPUT_FN_CHOICES, required=False)
 
     def __init__(self, *args, **kwargs):
         super(InputForm, self).__init__(*args, **kwargs)
-        if 'input-device' in self.data:
+        if 'condition-device' in self.data:
             try:
-                device_id = int(self.data.get('input-device'))
+                device_id = int(self.data.get('condition-device'))
                 device = SiteDevice.objects.get(id=device_id)
                 fields = Field.objects.filter(map__devicemap__device_type=device.device_type)
                 self.fields['variable'].queryset = fields
@@ -58,17 +59,18 @@ class OutputForm(forms.ModelForm):
         widget=forms.Select(attrs={'id': 'id_output-device'})
     )
     variable = forms.ModelChoiceField(
-        queryset=Field.objects.none(),
-        required=False
+        queryset=Field.objects.values_list('id','ahe_name'),
+        required=False,
+        widget=forms.Select(attrs={'id': 'id_output-variable'})
     )
     function = forms.ChoiceField(choices=FUNCTION_CHOICES)
     initial_function = forms.ChoiceField(choices=FUNCTION_CHOICES)
 
     def __init__(self, *args, **kwargs):
         super(OutputForm, self).__init__(*args, **kwargs)
-        if 'output-device' in self.data:
+        if 'action-device' in self.data:
             try:
-                device_id = int(self.data.get('output-device'))
+                device_id = int(self.data.get('action-device'))
                 device = SiteDevice.objects.get(id=device_id)
                 fields = Field.objects.filter(map__devicemap__device_type=device.device_type)
                 self.fields['variable'].queryset = fields

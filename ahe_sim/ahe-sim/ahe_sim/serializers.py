@@ -1,29 +1,49 @@
 from rest_framework import serializers
 from ahe_sim.models import  TestExecutionLog, Input, Output, TestScenario
+from ahe_mb.models import Field, SiteDevice
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SiteDevice
+        fields = ['id', 'name']
+
+
+class FieldSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Field
+        fields = ['id','ahe_name']
+
 
 class InputSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
+    variable = FieldSerializer()
+    device = DeviceSerializer()
 
     class Meta:
         model = Input
-        fields = ['id', 'variable', 'value', 'initial_value']
+        fields = ['id', 'variable', 'value', 'device','initial_value']
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
         internal_value['id'] = data.get('id')
         return internal_value
+
 
 class OutputSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
+    variable = FieldSerializer()
+    device = DeviceSerializer()
 
     class Meta:
         model = Output
-        fields = ['id', 'variable', 'initial_value', 'value', 'function']
+        fields = ['id', 'variable', 'initial_value', 'device','value', 'function']
 
     def to_internal_value(self, data):
         internal_value = super().to_internal_value(data)
         internal_value['id'] = data.get('id')
         return internal_value
+
 
 class TestScenarioSerializer(serializers.ModelSerializer):
     inputs = InputSerializer(many=True)
@@ -57,7 +77,6 @@ class TestScenarioSerializer(serializers.ModelSerializer):
                 print(type(inputs_data))
                 print(inputs_data)
                 for attr, value in input_data.items():
-                    print(attr, value)
                     setattr(input_instance, attr, value)
                 input_instance.save()
             else:

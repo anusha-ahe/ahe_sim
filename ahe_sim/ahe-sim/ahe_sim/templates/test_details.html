@@ -17,8 +17,8 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Timeout</th>
-                    <th>Input</th>
-                    <th>Output</th>
+                    <th>Condition</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,7 +29,7 @@
 
     <!-- Details Modal -->
     <div class="modal" id="detailsModal">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="detailsModalLabel">Details</h5>
@@ -64,8 +64,8 @@
                     '<td>' + test.id + '</td>' +
                     '<td>' + test.name + '</td>' +
                     '<td>' + test.timeout + '</td>' +
-                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + inputDetails + ', "input")\'>Input Details</button></td>' +
-                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + outputDetails + ', "output")\'>Output Details</button></td>' +
+                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + inputDetails + ', "input")\'>Condition Details</button></td>' +
+                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + outputDetails + ', "output")\'>Action Details</button></td>' +
                     '</tr>'
                 );
             });
@@ -84,18 +84,18 @@
             }
 
             if (type === 'input') {
-                tableHead.append('<tr><th>ID</th><th>Variable</th><th>Value</th><th>Initial Value</th><th>Function</th></tr>');
+                tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th>Value</th><th>Initial Value</th><th>Function</th></tr>');
                 details.forEach(function(input) {
                     tableBody.append(
-                        '<tr><td>' + input.id + '</td><td>' + input.variable + '</td><td>' + input.value + '</td><td>' +
+                        '<tr><td>' + input.id + '</td><td>' + input.device.name + '</td><td>' + input.variable.ahe_name + '</td><td>' + input.value + '</td><td>' +
                         input.initial_value + '</td><td>' + input.function + '</td></tr>'
                     );
                 });
             } else {
-                tableHead.append('<tr><th>ID</th><th>Variable</th><th> Initial Value</th><th>Initial Function</th><th>Value</th><th>Function</th></tr>');
+                tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th> Initial Value</th><th>Initial Function</th><th>Value</th><th>Function</th></tr>');
                 details.forEach(function(output) {
                     tableBody.append(
-                        '<tr><td>' + output.id + '</td><td>' + output.variable + '</td><td>' + output.initial_value +
+                        '<tr><td>' + output.id + '</td><td>' + output.device.name + '</td><td>' + output.variable.ahe_name + '</td><td>' + output.initial_value +
                          '</td><td>' + output.initial_function + '</td><td>' + output.value + '</td><td>' + output.function + '</td></tr>'
                     );
                 });

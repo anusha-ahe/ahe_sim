@@ -14,6 +14,10 @@ from .forms import InputForm, OutputForm, TestScenarioForm, DeviceForm
 from ahe_mb.models import SiteDevice, DeviceMap, Field
 
 
+def all_list_view(request):
+    return render(request, 'all.html')
+
+
 class TestScenarioViewSet(viewsets.ModelViewSet):
     queryset = TestScenario.objects.all()
     serializer_class = TestScenarioSerializer
@@ -27,7 +31,7 @@ class TestExecutionLogViewSet(viewsets.ModelViewSet):
 class TestScenarioListView(View):
     def get(self, request):
         logs = TestExecutionLog.objects.all()
-        return render(request, 'test_status.html', {'logs': logs})
+        return render(request, 'logs.html', {'logs': logs})
 
 
 class TestDetailsListView(View):
@@ -35,10 +39,9 @@ class TestDetailsListView(View):
         distinct_device_ids = SiteDevice.objects.values_list('id', flat=True).distinct()
         combined_conditions = Q(inputs__device_id__in=distinct_device_ids) | Q(
             outputs__device_id__in=distinct_device_ids)
-        test_scenarios = TestScenario.objects.filter(combined_conditions).order_by('priority').distinct()
+        test_scenarios = TestScenario.objects.filter(combined_conditions).order_by('priority')
         serializer = TestScenarioSerializer(test_scenarios, many=True)
         tests = json.dumps(serializer.data)
-        print(tests)
         return render(request, 'test_details.html', {'tests': tests})
 
 
@@ -52,47 +55,50 @@ def run_tests(request):
             return JsonResponse({'success': False, 'error': str(e)})
 
 
-def input_view(request):
+def test_scenario_view(request):
     if request.method == 'POST':
         test_scenario_form = TestScenarioForm(request.POST, prefix='test_scenario')
-        input_form = InputForm(request.POST, prefix='input')
-        output_form = OutputForm(request.POST, prefix='output')
-
         if test_scenario_form.is_valid():
             test_scenario_form.save()
-            return redirect('input')
-        elif input_form.is_valid():
-            input_form.save()
-            return redirect('input')
-        elif output_form.is_valid():
-            output_form.save()
-            return redirect('input')
+            return redirect('test_scenario')
     else:
         test_scenario_form = TestScenarioForm(prefix='test_scenario')
-        input_form = InputForm(prefix='input')
-        output_form = OutputForm(prefix='output')
-
-    return render(request, 'input.html', {
+    return render(request, 'test_scenario.html', {
         'test_scenario_form': test_scenario_form,
-        'input_form': input_form,
-        'output_form': output_form
     })
+
+def condition_view(request):
+    if request.method == 'POST':
+        input_form = InputForm(request.POST, prefix='condition')
+        if input_form.is_valid():
+            input_form.save()
+            return redirect('condition')
+    else:
+        input_form = InputForm(prefix='condition')
+    return render(request, 'condition.html', {'input_form': input_form})
+
+
+def action_view(request):
+    if request.method == 'POST':
+        output_form = OutputForm(request.POST, prefix='action')
+        if output_form.is_valid():
+            output_form.save()
+            return redirect('action')
+    else:
+        output_form = OutputForm(prefix='action')
+    return render(request, 'action.html', {
+        'output_form': output_form})
 
 
 def fetch_device_variables(request):
     device_id = request.GET.get('device_id')
-    print("device", device_id)
-    if device_id:
-        try:
-            print("here", device_id)
-            device = SiteDevice.objects.get(id=device_id)
-            fields = Field.objects.filter(map__devicemap__device_type=device.device_type)
-            field_list = list(fields.values('id', 'ahe_name'))
-            print(field_list)
-            return JsonResponse({'fields': field_list})
-        except SiteDevice.DoesNotExist:
-            pass
-    return JsonResponse({'fields': []})
+    try:
+        device = SiteDevice.objects.get(id=device_id)
+        fields = Field.objects.filter(map__devicemap__device_type=device.device_type)
+        variables = [{'id': field.id, 'ahe_name': field.ahe_name} for field in fields]
+        return JsonResponse({'variables': variables})
+    except SiteDevice.DoesNotExist:
+        return JsonResponse({'variables': []})
 
 
 def device_view(request):

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simulator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5 mb-3">Simulator</h1>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Path</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><a href="{% url 'test_scenario' %}">Test Scenario</a></td>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'condition' %}">Condition</a></td>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'action' %}">Action</a></td>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'device' %}">Device</a></td>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'test_details' %}">Test Details</a></td>
+                </tr>
+                <tr>
+                    <td><a href="{% url 'logs' %}">Logs</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
