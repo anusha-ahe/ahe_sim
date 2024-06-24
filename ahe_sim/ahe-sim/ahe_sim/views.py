@@ -67,6 +67,7 @@ def test_scenario_view(request):
         'test_scenario_form': test_scenario_form,
     })
 
+
 def condition_view(request):
     if request.method == 'POST':
         input_form = InputForm(request.POST, prefix='condition')
@@ -135,3 +136,14 @@ def delete_test(request):
         except TestScenario.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Test Scenario does not exist.'})
     return redirect('test_scenario')
+
+
+def delete_logs(request):
+    if request.method == 'POST':
+        log_id = request.POST.get('log_id')
+        try:
+            log = TestExecutionLog.objects.get(id=log_id)
+            log.delete()
+        except TestExecutionLog.DoesNotExist:
+            print(f"Log Doesnt Exist {log_id}")
+    return redirect('logs')
