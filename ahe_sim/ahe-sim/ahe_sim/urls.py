@@ -10,7 +10,7 @@ router.register(r'log', TestExecutionLogViewSet)
 
 
 urlpatterns = [
-    path('', all_list_view),
+    path('', all_list_view,name='home'),
     path('logs',TestScenarioListView.as_view(),name='logs'),
     path('test_details',TestDetailsListView.as_view(),name='test_details'),
     path('run_tests',run_tests,name='run_tests'),

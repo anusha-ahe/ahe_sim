@@ -60,7 +60,7 @@ def test_scenario_view(request):
         test_scenario_form = TestScenarioForm(request.POST, prefix='test_scenario')
         if test_scenario_form.is_valid():
             test_scenario_form.save()
-            return redirect('test_scenario')
+            return redirect('home')
     else:
         test_scenario_form = TestScenarioForm(prefix='test_scenario')
     return render(request, 'test_scenario.html', {
@@ -72,7 +72,7 @@ def condition_view(request):
         input_form = InputForm(request.POST, prefix='condition')
         if input_form.is_valid():
             input_form.save()
-            return redirect('condition')
+            return redirect('home')
     else:
         input_form = InputForm(prefix='condition')
     return render(request, 'condition.html', {'input_form': input_form})
@@ -83,7 +83,7 @@ def action_view(request):
         output_form = OutputForm(request.POST, prefix='action')
         if output_form.is_valid():
             output_form.save()
-            return redirect('action')
+            return redirect('home')
     else:
         output_form = OutputForm(prefix='action')
     return render(request, 'action.html', {
