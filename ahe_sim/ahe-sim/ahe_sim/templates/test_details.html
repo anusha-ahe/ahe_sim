@@ -19,6 +19,7 @@
                     <th>Timeout</th>
                     <th>Condition</th>
                     <th>Action</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -52,57 +53,82 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            var tests = JSON.parse('{{ tests|escapejs }}');
-            var tableBody = $('table tbody');
-            tests.forEach(function(test) {
-                var inputDetails = JSON.stringify(test.inputs);
-                var outputDetails = JSON.stringify(test.outputs);
+    $(document).ready(function() {
+        var tests = JSON.parse('{{ tests|escapejs }}');
+        var tableBody = $('table tbody');
+        tests.forEach(function(test) {
+            var inputDetails = JSON.stringify(test.inputs);
+            var outputDetails = JSON.stringify(test.outputs);
 
-                tableBody.append(
-                    '<tr>' +
-                    '<td>' + test.id + '</td>' +
-                    '<td>' + test.name + '</td>' +
-                    '<td>' + test.timeout + '</td>' +
-                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + inputDetails + ', "input")\'>Condition Details</button></td>' +
-                    '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + outputDetails + ', "output")\'>Action Details</button></td>' +
-                    '</tr>'
-                );
-            });
+            tableBody.append(
+                '<tr>' +
+                '<td>' + test.id + '</td>' +
+                '<td>' + test.name + '</td>' +
+                '<td>' + test.timeout + '</td>' +
+                '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + inputDetails + ', "input")\'>Condition Details</button></td>' +
+                '<td><button class="btn btn-primary mb-3" onclick=\'showDetails(' + outputDetails + ', "output")\'>Action Details</button></td>' +
+                '<td><button class="btn btn-danger mb-3 delete-test" data-id="' + test.id + '">Delete</button></td>' +
+                '</tr>'
+            );
         });
 
-        function showDetails(details, type) {
-            var tableHead = $('#detailsTable thead');
-            var tableBody = $('#detailsTable tbody');
-            // Clear any existing content
-            tableHead.empty();
-            tableBody.empty();
-
-            // Parse the JSON string into an object
-            if (typeof details === 'string') {
-                details = JSON.parse(details);
-            }
-
-            if (type === 'input') {
-                tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th>Value</th><th>Initial Value</th><th>Function</th></tr>');
-                details.forEach(function(input) {
-                    tableBody.append(
-                        '<tr><td>' + input.id + '</td><td>' + input.device.name + '</td><td>' + input.variable.ahe_name + '</td><td>' + input.value + '</td><td>' +
-                        input.initial_value + '</td><td>' + input.function + '</td></tr>'
-                    );
-                });
-            } else {
-                tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th> Initial Value</th><th>Initial Function</th><th>Value</th><th>Function</th></tr>');
-                details.forEach(function(output) {
-                    tableBody.append(
-                        '<tr><td>' + output.id + '</td><td>' + output.device.name + '</td><td>' + output.variable.ahe_name + '</td><td>' + output.initial_value +
-                         '</td><td>' + output.initial_function + '</td><td>' + output.value + '</td><td>' + output.function + '</td></tr>'
-                    );
+        $('.delete-test').on('click', function() {
+            var testId = $(this).data('id');
+             {
+                $.ajax({
+                    url: "{% url 'delete_test' %}",
+                    type: 'POST',
+                    data: {
+                        'test_id': testId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload()
+                        } else {
+                            alert('Failed to delete the test.');
+                        }
+                    },
+                    error: function() {
+                        alert('Error deleting the test.');
+                    }
                 });
             }
+        });
+    });
 
-            $('#detailsModal').modal('show');
+    function showDetails(details, type) {
+        var tableHead = $('#detailsTable thead');
+        var tableBody = $('#detailsTable tbody');
+        // Clear any existing content
+        tableHead.empty();
+        tableBody.empty();
+
+        // Parse the JSON string into an object
+        if (typeof details === 'string') {
+            details = JSON.parse(details);
         }
-    </script>
+
+        if (type === 'input') {
+            tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th>Value</th><th>Initial Value</th><th>Function</th></tr>');
+            details.forEach(function(input) {
+                tableBody.append(
+                    '<tr><td>' + input.id + '</td><td>' + input.device.name + '</td><td>' + input.variable.ahe_name + '</td><td>' + input.value + '</td><td>' +
+                    input.initial_value + '</td><td>' + input.function + '</td></tr>'
+                );
+            });
+        } else {
+            tableHead.append('<tr><th>ID</th><th>Device</th><th>Variable</th><th> Initial Value</th><th>Initial Function</th><th>Value</th><th>Function</th></tr>');
+            details.forEach(function(output) {
+                tableBody.append(
+                    '<tr><td>' + output.id + '</td><td>' + output.device.name + '</td><td>' + output.variable.ahe_name + '</td><td>' + output.initial_value +
+                     '</td><td>' + output.initial_function + '</td><td>' + output.value + '</td><td>' + output.function + '</td></tr>'
+                );
+            });
+        }
+
+        $('#detailsModal').modal('show');
+    }
+</script>
 </body>
 </html>

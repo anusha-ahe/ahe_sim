@@ -123,3 +123,15 @@ def delete_device(request):
         except SiteDevice.DoesNotExist:
             print(f"Device Doesnt Exist {device_id}")
     return redirect('device')
+
+
+def delete_test(request):
+    if request.method == 'POST':
+        test_id = request.POST.get('test_id')
+        try:
+            test = TestScenario.objects.get(id=test_id)
+            test.delete()
+            return JsonResponse({'success': True})
+        except TestScenario.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Test Scenario does not exist.'})
+    return redirect('test_scenario')
