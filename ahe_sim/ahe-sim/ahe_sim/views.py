@@ -112,3 +112,14 @@ def device_view(request):
         device_form = DeviceForm(prefix='device')
         return render(request, 'device.html', {
             'device_form': device_form, 'devices': devices})
+
+
+def delete_device(request):
+    if request.method == 'POST':
+        device_id = request.POST.get('device_id')
+        try:
+            device = SiteDevice.objects.get(id=device_id)
+            device.delete()
+        except SiteDevice.DoesNotExist:
+            print(f"Device Doesnt Exist {device_id}")
+    return redirect('device')

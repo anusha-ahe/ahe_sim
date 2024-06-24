@@ -15,6 +15,7 @@
                     <th>Device Type</th>
                     <th>Unit</th>
                     <th>DataHoldPeriod</th>
+                    <th>Delete </th>
                 </tr>
             </thead>
             <tbody>
@@ -27,6 +28,14 @@
                         <td>{{ dev.device_type }}</td>
                         <td>{{ dev.unit }}</td>
                         <td>{{ dev.data_hold_period }}</td>
+                        <td>
+                        <form method="post" action="{% url 'delete_device' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="device_id" value="{{ dev.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                        </td>
 
                     </tr>
                 {% endfor %}

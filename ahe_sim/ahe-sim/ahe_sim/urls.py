@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (TestScenarioViewSet, TestExecutionLogViewSet, run_tests, TestScenarioListView, test_scenario_view,
                     condition_view, action_view,
-                    fetch_device_variables, TestDetailsListView, device_view, all_list_view)
+                    fetch_device_variables, TestDetailsListView, device_view, all_list_view,delete_device)
 
 router = DefaultRouter()
 router.register(r'test', TestScenarioViewSet)
@@ -18,4 +18,5 @@ urlpatterns = [
     path('action/', action_view, name='action'),
     path('test_scenario/', test_scenario_view, name='test_scenario'),
     path('device/', device_view, name='device'),
+    path('delete_device/', delete_device, name='delete_device'),
     path('fetch_variables/', fetch_device_variables, name='fetch_variables')]
