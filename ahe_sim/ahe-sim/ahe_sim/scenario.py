@@ -103,13 +103,15 @@ class ScenarioUpdate:
         self.start_servers()
         plc_status = [PlcHealth(plc_device, self.simulator).get_plc_health_status() for plc_device in
                       self.plc_devices]
+
         for log in TestExecutionLog.objects.filter(status='pending'):
-            if all(plc_status):
+            if all([status for plc_data, status in plc_status]):
                 self.process_log(log)
             else:
                 log.status = 'plc_connection_failure'
                 log.save()
-                print(f"PLC health status failure for devices: {plc_status}")
+                failed_plc_data = [plc_data for plc_data, status in plc_status if not status]
+                print(f"PLC health status failure for {log.name} : {failed_plc_data}")
 
 
 if __name__ == '__main__':

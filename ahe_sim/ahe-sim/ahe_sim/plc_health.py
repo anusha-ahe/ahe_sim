@@ -23,8 +23,11 @@ class PlcHealth:
         return plc_data
 
     def can_connect_to_all_devices(self):
-        plc_data = self.get_plc_data()
         status = dict()
+        plc_data = self.get_plc_data()
+        if 'ems_1_modbus_failed' in plc_data:
+            status['ems_1'] = False
+            return status
         for dev in self.connected_devices:
             status[f"{dev.name}"] = None
             if f"{self.plc.name}_{dev.name}_status" in plc_data and \
@@ -36,17 +39,16 @@ class PlcHealth:
                     plc_data[
                         f"{self.plc.name}_{dev.name}_status"] == 0:
                 status[f"{dev.name}"] = False
-            elif 'ems_1_modbus_failed' in plc_data:
-                status['ems_1'] = False
         return status
 
     def get_plc_health_status(self):
         read_status = self.can_connect_to_all_devices()
+        print("read status", read_status)
         if all(read_status.values()):
-            return True
+            return read_status, True
         elif 'ems' in read_status and read_status['ems_1'] == False:
             print(f"{self.plc.name} is not reachable")
-            return False
+            return read_status, False
         else:
             print(f"{self.plc.name} unable to connect to devices - {read_status}")
-            return False
+            return read_status, False
