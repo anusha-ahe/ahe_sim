@@ -101,9 +101,9 @@ class ScenarioUpdate:
     def update_pending_test_log_status(self):
         self.create_test_log_for_test_scenarios()
         self.start_servers()
+        plc_status = [PlcHealth(plc_device, self.simulator).get_plc_health_status() for plc_device in
+                      self.plc_devices]
         for log in TestExecutionLog.objects.filter(status='pending'):
-            plc_status = [PlcHealth(plc_device, self.simulator).get_plc_health_status() for plc_device in
-                          self.plc_devices]
             if all(plc_status):
                 self.process_log(log)
             else:

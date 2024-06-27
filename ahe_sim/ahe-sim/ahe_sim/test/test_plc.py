@@ -67,7 +67,8 @@ class SimTestPlc(TestCase):
         plc = PlcHealth(self.ems_1, self.simulator)
         plc.simulator.start_server(self.ems_1.name)
         time.sleep(1)
-        assert plc.is_reachable()
+        status = plc.can_connect_to_all_devices()
+        assert 'ems_1' not in status
         plc.simulator.stop_server(self.ems_1.name)
 
     def test_plc_can_connect_to_all_devices(self):
