@@ -8,6 +8,8 @@ RUN pip install pymodbus requests django-cors-headers
 
 RUN pip install django-crispy-forms crispy-bootstrap4
 
+RUN pip install mysqlclient
+
 COPY ahe_log /opt/ems/ahe_log
 WORKDIR /opt/ems/ahe_log/ahe-log
 ENV PYTHONPATH /opt/ems/ahe_log
