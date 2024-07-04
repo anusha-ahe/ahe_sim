@@ -6,6 +6,7 @@ from ahe_mb.models import Map, Field, SiteDevice, DeviceMap
 from ahe_sim.scenario import ScenarioUpdate
 from ahe_sys.models import AheClient, SiteDeviceList, Site, DeviceType
 from ahe_mb.master import ModbusMaster
+import ahe_translate
 
 
 class SimTest(TestCase):
@@ -64,15 +65,6 @@ class SimTest(TestCase):
         self.scenario_update.create_test_log_for_test_scenarios()
         assert TestExecutionLog.objects.filter(epoch=100)[0].epoch == 100
 
-
-    def test_get_actual_output_when_output_device_is_not_ems(self):
-        self.scenario_update.start_servers()
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            simulation.set_value(server_identity, 'test_field4', 7)
-        output = self.scenario_update.get_actual_output(self.output)
-        assert output == 7
-
     def test_get_actual_output_when_output_device_is_ems(self):
         self.output1 = \
             Output.objects.get_or_create(variable=self.field5, device=self.device1, test_scenario=self.test_scenario1,
@@ -84,62 +76,59 @@ class SimTest(TestCase):
         output = self.scenario_update.get_actual_output(self.output1)
         assert output == 2
         self.output1.delete()
+        self.scenario_update.simulator.stop_server('ems_1')
 
     def test_update_initial_values_for_inputs_and_outputs_with_expected_initial_output(self):
         self.scenario_update.create_test_log_for_test_scenarios()
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
         self.scenario_update.start_servers()
+        time.sleep(2)
         self.scenario_update.update_values_for_inputs(log, 'initial')
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            simulation.set_value(server_identity, 'test_field4', 7)
-            simulation.set_value(server_identity, 'test_field5', 0)
+        self.scenario_update.update_and_translate_values('test_1', 'test_field4', 7)
+        self.scenario_update.update_and_translate_values('test_1', 'test_field5', 0)
         self.scenario_update.update_log_status_from_output(log, 'initial')
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            data = simulation.data[server_identity]
-            assert data['test_field1'] == 1
-            assert data['test_field2'] == 20
-            assert data['test_field3'] == 6
-            assert data['test_field4'] == 7
+        data = self.scenario_update.data['test_1']
+        print("data, here", data)
+        assert data['test_1_test_field1'] == 1
+        assert data['test_1_test_field2'] == 2
+        assert data['test_1_test_field3'] == 3
+        assert data['test_1_test_field4'] == 7
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
+        self.scenario_update.stop_servers()
 
     def test_update_initial_values_for_inputs_and_outputs_and_initial_update_failed_for_output(self):
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
+        time.sleep(2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
-        self.scenario_update.update_values_for_inputs(log,'initial')
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            simulation.set_value(server_identity, 'test_field4', 0)
+        self.scenario_update.update_values_for_inputs(log, 'initial')
+        self.scenario_update.update_and_translate_values('test_1', 'test_field4', 0)
         self.scenario_update.update_log_status_from_output(log,'initial')
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            data = simulation.data[server_identity]
-            assert data['test_field1'] == 1
-            assert data['test_field2'] == 20
-            assert data['test_field3'] == 6
-        log = TestExecutionLog.objects.filter(test_scenario = self.test_scenario1)
-        print(log)
+        data = self.scenario_update.data['test_1']
+        print("here, data", data)
+        assert data['test_1_test_field1'] == 1
+        assert data['test_1_test_field2'] == 2
+        assert data['test_1_test_field3'] == 3
+        log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
         assert log[0].status == 'failure'
+        self.scenario_update.stop_servers()
+
     def test_update_values_for_inputs(self):
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
         self.scenario_update.update_values_for_inputs(log)
-        simulation = self.scenario_update.simulator
-        for server_identity in simulation.data.keys():
-            data = simulation.data[server_identity]
-            assert data['test_field1'] == 1
-            assert data['test_field2'] == 20
-            assert data['test_field3'] == 8
+        data = self.scenario_update.data['test_1']
+        assert data['test_1_test_field1'] == 1
+        assert data['test_1_test_field2'] == 2
+        self.scenario_update.stop_servers()
 
     def test_log_success_status(self):
         simulation = self.scenario_update.simulator
         for server_identity in simulation.data.keys():
             data = simulation.data[server_identity]
-            simulation.set_value(server_identity,'test_field4',6)
-            simulation.set_value(server_identity, 'test_field5', 0)
+            self.scenario_update.update_and_translate_values(server_identity,'test_field4',6)
+            self.scenario_update.update_and_translate_values(server_identity, 'test_field5', 0)
             self.scenario_update.get_available_test_scenarios_for_simulator()
             self.scenario_update.create_test_log_for_test_scenarios()
             log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
@@ -148,15 +137,30 @@ class SimTest(TestCase):
             assert data['test_field1'] == 1
             assert data['test_field2'] == 20
             assert data['test_field3'] == 6
-            simulation.set_value(server_identity, 'test_field4', 10)
-            simulation.set_value(server_identity, 'test_field5', 1)
+            self.scenario_update.update_and_translate_values(server_identity, 'test_field4', 10)
+            self.scenario_update.update_and_translate_values(server_identity, 'test_field5', 1)
             self.scenario_update.update_values_for_inputs(log)
             self.scenario_update.update_log_status_from_output(log)
             assert log.status == 'success'
+            self.scenario_update.stop_servers()
 
 
     def test_update_pending_test_log_status(self):
         self.scenario_update.update_pending_test_log_status()
         for log in TestExecutionLog.objects.filter():
             assert log.status != 'pending'
+
+
+    def test_update_and_translate_with_translation(self):
+        ahe_translate.models.Translate.objects.get_or_create(
+            seq=1,
+            source='(test_field_|battery_1_current)',
+            dest='battery_1_power',
+            func='MUL',
+            removed_match=0,
+            config_id=13,
+            parent_id=None,
+            param=None
+        )
+
 

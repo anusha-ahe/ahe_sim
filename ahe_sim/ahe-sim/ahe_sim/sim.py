@@ -5,7 +5,6 @@ from ahe_sim.slave import run_slave
 import multiprocessing
 from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSlaveContext, ModbusServerContext
 
-
 class Simulation:
     def __init__(self):
         self.server_processes = {}
@@ -74,6 +73,7 @@ class Simulation:
     def set_value(self, server_identity, ahe_name, value):
         field = self.get_field_dict[server_identity][ahe_name]
         register_address = field.field_address
+        print("reg address", register_address)
         modbus_var = ModbusVar(field)
         modbus_var.set_value(value)
         self.slaves[server_identity].setValues(3, register_address, modbus_var.registers)
@@ -83,6 +83,7 @@ class Simulation:
 
     def update_and_translate_values(self, server_identity, ahe_name, value):
         self.set_value(server_identity, ahe_name, value)
+
 
 
     def start_server(self, device_name, timeout=None):

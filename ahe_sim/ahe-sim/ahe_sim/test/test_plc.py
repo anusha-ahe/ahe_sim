@@ -100,11 +100,11 @@ class SimTestPlc(TestCase):
         for dev in plc.connected_devices:
             plc.simulator.stop_server(dev.name)
         plc.simulator.stop_server(self.ems_1.name)
-        assert not plc.get_plc_health_status()
+        assert not plc.get_plc_health_status()[1]
 
     def test_failed_plc_health_status_when_plc_is_not_reachable(self):
         plc = PlcHealth(self.ems_1, self.simulator)
-        assert not plc.get_plc_health_status()
+        assert not plc.get_plc_health_status()[1]
 
 
 

@@ -120,28 +120,28 @@ class SimTest(TestCase):
 
 
     def test_log_success_status_when_min_cell_voltage_less_and_pcs_is_turned_off(self):
-        TestExecutionLog.objects.filter().delete()
-        simulation = self.scenario_update.simulator
+        TestExecutionLog.objects.filter().delete()      
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
+        time.sleep(2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
-        simulation.set_value('inverter_1', 'active_power', 1000)
-        assert simulation.data['inverter_1']['active_power'] == 15
+        self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 15)
+        assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 15
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
-        simulation.set_value('inverter_1', 'active_power', 0)
-        assert simulation.data['inverter_1']['active_power'] == 0
+        self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 0)
+        assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 0
         self.scenario_update.update_values_for_inputs(log)
         self.scenario_update.update_log_status_from_output(log)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
         assert log[0].status == 'success'
         log2= TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
-        simulation.set_value('inverter_2', 'active_power', 1000)
-        assert simulation.data['inverter_2']['active_power'] == 15
+        self.scenario_update.update_and_translate_values('inverter_2', 'active_power', 15)
+        assert self.scenario_update.data['inverter_2']['inverter_2_active_power'] == 15
         self.scenario_update.update_values_for_inputs(log2, 'initial')
         self.scenario_update.update_log_status_from_output(log2, 'initial')
-        simulation.set_value('inverter_2', 'active_power', 0)
-        assert simulation.data['inverter_2']['active_power'] == 0
+        self.scenario_update.update_and_translate_values('inverter_2', 'active_power', 0)
+        assert self.scenario_update.data['inverter_2']['inverter_2_active_power'] == 0
         self.scenario_update.update_values_for_inputs(log2)
         self.scenario_update.update_log_status_from_output(log2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)
@@ -150,12 +150,12 @@ class SimTest(TestCase):
 
     def test_log_failure_status_when_min_cell_voltage_less_and_pcs_is_not_turned_off(self):
         TestExecutionLog.objects.filter().delete()
-        simulation = self.scenario_update.simulator
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
+        time.sleep(2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0]
-        simulation.set_value('inverter_1', 'active_power', 1000)
-        assert simulation.data['inverter_1']['active_power'] == 15
+        self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 15)
+        assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 15
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
         self.scenario_update.update_values_for_inputs(log)
@@ -166,16 +166,16 @@ class SimTest(TestCase):
 
     def test_log_success_status_when_max_cell_voltage_greater_and_pcs_is_not_turned_off(self):
         TestExecutionLog.objects.filter().delete()
-        simulation = self.scenario_update.simulator
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
+        time.sleep(2)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario3)[0]
-        simulation.set_value('inverter_1', 'active_power', 1000)
-        assert simulation.data['inverter_1']['active_power'] == 15
+        self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 15)
+        assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 15
         self.scenario_update.update_values_for_inputs(log, 'initial')
         self.scenario_update.update_log_status_from_output(log, 'initial')
-        simulation.set_value('inverter_1', 'active_power', 0)
-        assert simulation.data['inverter_1']['active_power'] == 0
+        self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 0)
+        assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 0
         self.scenario_update.update_values_for_inputs(log)
         self.scenario_update.update_log_status_from_output(log)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario3)
@@ -185,17 +185,16 @@ class SimTest(TestCase):
 
     def test_log_success_for_all_test_case_examples(self):
         TestExecutionLog.objects.filter().delete()
-        simulation = self.scenario_update.simulator
         self.scenario_update.create_test_log_for_test_scenarios()
         self.scenario_update.start_servers()
         for log in TestExecutionLog.objects.filter():
-            simulation.set_value('inverter_1', 'active_power', 1000)
-            simulation.set_value('inverter_2', 'active_power', 1000)
+            self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 15)
+            self.scenario_update.update_and_translate_values('inverter_2', 'active_power', 15)
             self.scenario_update.update_values_for_inputs(log, 'initial')
             self.scenario_update.update_log_status_from_output(log,  'initial')
-            simulation.set_value('inverter_1', 'active_power', 0)
-            simulation.set_value('inverter_2', 'active_power', 0)
-            assert simulation.data['inverter_1']['active_power'] == 0
+            self.scenario_update.update_and_translate_values('inverter_1', 'active_power', 0)
+            self.scenario_update.update_and_translate_values('inverter_2', 'active_power', 0)
+            assert self.scenario_update.data['inverter_1']['inverter_1_active_power'] == 0
             self.scenario_update.update_values_for_inputs(log)
             self.scenario_update.update_log_status_from_output(log)
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)[0].status == 'success'
@@ -203,8 +202,3 @@ class SimTest(TestCase):
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario3)[0].status == 'success'
         assert TestExecutionLog.objects.filter(test_scenario=self.test_scenario4)[0].status == 'success'
         self.scenario_update.stop_servers()
-
-
-
-
-
