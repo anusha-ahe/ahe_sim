@@ -135,7 +135,7 @@ class SimTest(TestCase):
         self.scenario_update.update_log_status_from_output(log)
         log = TestExecutionLog.objects.filter(test_scenario=self.test_scenario1)
         assert log[0].status == 'success'
-        log2= TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
+        log2 = TestExecutionLog.objects.filter(test_scenario=self.test_scenario2)[0]
         self.scenario_update.update_and_translate_values('inverter_2', 'active_power', 15)
         assert self.scenario_update.data['inverter_2']['inverter_2_active_power'] == 15
         self.scenario_update.update_values_for_inputs(log2, 'initial')

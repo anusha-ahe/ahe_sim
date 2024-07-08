@@ -35,13 +35,13 @@ class SimTest(TestCase):
 
     def test_set_all_initial_values_to_0(self):
         self.simulation.set_server_context("server_identity", 10)
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         data = self.simulation.set_all_initial_values_to_0("server_identity")
         assert data == {'server_identity': {'test_field1': 0, 'test_field2': 0}}
 
     def test_get(self):
         self.simulation.set_server_context("server_identity", 10)
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2.ahe_name}}
         self.simulation.set_all_initial_values_to_0("server_identity")
@@ -50,7 +50,7 @@ class SimTest(TestCase):
 
     def test_set_value(self):
         self.simulation.set_server_context("server_identity", 10)
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2.ahe_name}}
         self.simulation.maps = {"server_identity": self.map_obj.name}
@@ -63,7 +63,7 @@ class SimTest(TestCase):
 
     def test_set_value_with_scaling(self):
         self.simulation.set_server_context("server_identity", 10)
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2}}
         self.simulation.maps = {"server_identity": self.map_obj.name}
@@ -75,7 +75,7 @@ class SimTest(TestCase):
         assert value == 60
 
     def test_start_server(self):
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2}}
         self.simulation.devices = {"server_identity": [self.map_obj.name]}
@@ -97,7 +97,7 @@ class SimTest(TestCase):
         mock_client_instance = MockModbusTcpClient.return_value
         mock_client_instance.read_holding_registers.side_effect = ModbusIOException("Read timeout")
         self.simulation.set_server_context("server_identity", 10)
-        self.simulation.field_dict = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
+        self.simulation.address_to_field = {"server_identity": {1: self.field1.ahe_name, 2: self.field2.ahe_name}}
         self.simulation.get_field_dict = {"server_identity": {self.field1.ahe_name: self.field1,
                                                               self.field2.ahe_name: self.field2}}
 

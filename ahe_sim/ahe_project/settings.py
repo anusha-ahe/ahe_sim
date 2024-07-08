@@ -78,23 +78,12 @@ WSGI_APPLICATION = 'ahe_project.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 #
 
-
 DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME':  'ahe',
-            'USER':  'ahe',
-            'PASSWORD': 'ahe',
-            'HOST': '10.10.8.2',
-            'PORT': os.getenv('AHE_DB_PORT', '3306'),
-            'TEST': {
-                'NAME': f"test_{os.getenv('AHE_DB_NAME')}",
-            },
-            'OPTIONS': {
-                "init_command": "SET GLOBAL max_connections = 100000",  # <-- The fix
-            }
-        }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR +'/db.sqlite3',
     }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
